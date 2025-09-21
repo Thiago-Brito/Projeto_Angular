@@ -59,36 +59,6 @@
       "nome": "Bosster",
       "preco": 1111,
       "categoria": "Livros"
-    },
-    {
-      "id": "77a3",
-      "nome": "Bosster1",
-      "preco": 9.99,
-      "categoria": "Papelaria"
-    },
-    {
-      "id": "9947",
-      "nome": "teste1",
-      "preco": 20,
-      "categoria": "Papelaria"
-    },
-    {
-      "id": null,
-      "nome": "aa",
-      "preco": 11.11,
-      "categoria": "Vestuário"
-    },
-    {
-      "id": null,
-      "nome": "11",
-      "preco": 1.11,
-      "categoria": "Vestuário"
-    },
-    {
-      "id": null,
-      "nome": "11",
-      "preco": 1.11,
-      "categoria": "Vestuário"
     }
   ],
   "categorias": [
@@ -137,7 +107,7 @@
     },
     {
       "id": "2",
-      "nome": "Maria Oliveira",
+      "nome": "Maria Oliveiraa aaaaa aaaa  aaaa aa",
       "localidade": "João Pessoa",
       "email": "maria@gmai.com",
       "telefone": "21988888888",

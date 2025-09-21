@@ -74,8 +74,9 @@ export class CadastroComponent implements OnInit {
           }
         });
       } else {
+        const { id, ...novoProduto } = this.camposForm.value;
         this.produtoService
-          .salvar(this.camposForm.value)
+          .salvar(novoProduto)
           .subscribe({
             next: produto => {
               console.log('Salva com sucesso!', produto);
