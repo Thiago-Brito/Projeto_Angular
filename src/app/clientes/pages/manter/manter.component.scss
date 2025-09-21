@@ -1,0 +1,36 @@
+
+.card-title{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+}
+.botoes{
+    display: flex;
+    gap: 10px;
+}
+.card{
+    margin-top: 50px;
+    padding: 50px;
+    width: 700px;
+    align-items: center;
+}
+table{
+    background: none;
+    cursor: pointer;
+    max-height: 160px !important;   
+    overflow: auto;
+    border-radius: 4px;
+}
+.inputField{
+    width: 100%;
+}
+button[color="warn"] {
+  background: red !important;
+  color: white !important;
+}
+mat-paginator{
+    margin-top: 10px;
+    background: transparent !important;
+}

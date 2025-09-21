@@ -129,6 +129,7 @@
     {
       "id": "1",
       "nome": "João Silva",
+      "localidade": "Recife",
       "email": "joao@gmail.com",
       "telefone": "11999999999",
       "endereco": "Rua A, 123, São Paulo, SP",
@@ -137,6 +138,7 @@
     {
       "id": "2",
       "nome": "Maria Oliveira",
+      "localidade": "João Pessoa",
       "email": "maria@gmai.com",
       "telefone": "21988888888",
       "endereco": "Avenida B, 456, Rio de Janeiro, RJ",

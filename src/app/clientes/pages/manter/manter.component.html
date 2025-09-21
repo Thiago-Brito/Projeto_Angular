@@ -1,1 +1,62 @@
-<p>manter works!</p>
+<mat-card class="card container">
+  <div class="card-title">
+    <h1>Clientes</h1>
+    <div class="botoes">
+      <button mat-raised-button routerLink="/paginas/clientes/cadastro" color="primary">
+        <mat-icon>add</mat-icon>
+        Adicionar
+      </button>
+      <button mat-raised-button color="warn" (click)="deleteSelected()" [disabled]="!hasAnySelected() || loadingDelete">
+        <mat-icon>delete</mat-icon>
+        Excluir
+      </button>
+    </div>
+  </div>
+
+  <mat-form-field class="inputField">
+    <mat-label>Procure o Cliente</mat-label>
+    <input matInput placeholder="Ex. Booster" name="nomeBusca" [(ngModel)]="nomeBusca"
+      (ngModelChange)="filtrar()">
+  </mat-form-field>
+
+  <table mat-table [dataSource]="clientes" class="mat-elevation-z8">
+    <ng-container matColumnDef="check">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox [checked]="isAllSelected()" (change)="toggleMaster($event.checked)">
+          <span></span>
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let Cliente">
+        <mat-checkbox [(ngModel)]="Cliente.selecionado" (click)="$event.stopPropagation()">
+          <span></span>
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef> Nome </th>
+      <td mat-cell *matCellDef="let cliente"  [routerLink]="['/paginas/clientes/cadastro']"
+       [queryParams]="{ id: cliente.id }"> {{cliente.nome}} </td>
+    </ng-container>
+    <ng-container matColumnDef="localidade">
+      <th mat-header-cell *matHeaderCellDef> Localidade </th>
+      <td mat-cell *matCellDef="let cliente"  [routerLink]="['/paginas/clientes/cadastro']"
+       [queryParams]="{ id: cliente.id }">{{cliente.localidade}} </td>
+    </ng-container>
+    <ng-container matColumnDef="email">
+      <th mat-header-cell *matHeaderCellDef> Email </th>
+      <td mat-cell *matCellDef="let cliente"  [routerLink]="['/paginas/clientes/cadastro']"
+       [queryParams]="{ id: cliente.id }"> {{cliente.email}} </td>
+    </ng-container>
+    <ng-container matColumnDef="telefone">
+      <th mat-header-cell *matHeaderCellDef> Telefone </th>
+      <td mat-cell *matCellDef="let cliente"  [routerLink]="['/paginas/clientes/cadastro']"
+       [queryParams]="{ id: cliente.id }"> {{cliente.telefone}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of periodic elements">
+  </mat-paginator>
+</mat-card>
