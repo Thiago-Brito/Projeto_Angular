@@ -1,0 +1,29 @@
+<mat-toolbar color="primary">
+    <div class="container header">
+        <button matIconButton class="menu" [matMenuTriggerFor]="menu">
+            <mat-icon>menu</mat-icon>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item>
+                    <mat-icon>group</mat-icon>
+                    Clientes
+                </button>
+                <button mat-menu-item routerLink="/paginas/produtos">
+                    <mat-icon fontSet="material-symbols-outlined">box</mat-icon>
+                    Produtos
+                </button>
+                <button mat-menu-item>
+                    <mat-icon fontSet="material-symbols-outlined">finance_mode</mat-icon>
+                    Relatorios
+                </button>
+                <button mat-menu-item>
+                    <mat-icon>settings</mat-icon>
+                    Configurações
+                </button>
+            </mat-menu>
+        </button>
+        <a routerLink="/paginas">Banca Zapp</a>
+        <span></span>
+    </div>
+</mat-toolbar>
+
+<router-outlet></router-outlet>

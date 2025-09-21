@@ -1,0 +1,24 @@
+.header{
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+a{
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.menu{
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+.menu:hover{
+    border: black solid 1px;
+    border-radius: 16px;
+    transform: scale(1.02);
+}

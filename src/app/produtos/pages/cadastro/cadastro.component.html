@@ -1,0 +1,45 @@
+<div class="container">
+    <mat-card class="card">
+        <div class="card-title">
+            <h1>{{titulo}}</h1>
+            <button mat-raised-button routerLink="/paginas/produtos" color="primary">
+                <mat-icon>arrow_back</mat-icon>
+                Voltar
+            </button>
+        </div>
+        <form id="produtoForm" [formGroup]="camposForm" (ngSubmit)="salvar()">
+            <mat-form-field class="inputField">
+                <mat-label>Nome</mat-label>
+                <input matInput required placeholder="Ex. Booster" id="nome" formControlName="nome" name="nome"
+                    type="text" value="">
+
+            </mat-form-field>
+            <span class="obrigatorio" *ngIf="isCampoInvalido('nome')">
+                Campo Obrigatório
+            </span>
+            <mat-form-field class="inputField">
+                <mat-label>Preço</mat-label>
+                <input matInput
+                        formControlName="preco"
+                        currencyMask
+                        placeholder="Ex. R$ 9,99" />
+            </mat-form-field>
+            <span class="obrigatorio" *ngIf="isCampoInvalido('preco')">
+                Campo Obrigatório
+            </span>
+            <mat-form-field class="inputField">
+                <mat-label>Selecione sua categoria*</mat-label>
+                <mat-select id="categoria" name="categoria" formControlName="categoria" required>
+                    <mat-option *ngFor="let categoria of categorias" value={{categoria.nome}}>
+                        {{ categoria.nome}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+            <span class="obrigatorio" *ngIf="isCampoInvalido('categoria')">
+                Campo Obrigatório
+            </span>
+
+            <button matButton="elevated" type="submit">{{botaoTexto}}</button>
+        </form>
+    </mat-card>
+</div>

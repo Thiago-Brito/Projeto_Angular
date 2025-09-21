@@ -1,0 +1,15 @@
+<mat-grid-list class="container" cols="2" rowHeight="200px" gutterSize="16px">
+  <mat-grid-tile *ngFor="let card of cards">
+    <mat-card class="tile-card" routerLink={{card.link}}>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon fontSet="material-symbols-outlined">{{card.icon}}</mat-icon>
+        </mat-card-title>
+        <mat-card-subtitle>{{card.title}}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        {{card.subtitle}}
+      </mat-card-content>
+    </mat-card>
+  </mat-grid-tile>
+</mat-grid-list>

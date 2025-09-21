@@ -1,0 +1,22 @@
+mat-card {
+  width:90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+mat-card:hover{
+    border: black solid 1px;
+    border-radius: 16px;
+    transform: scale(1.02);
+}
+mat-card-title{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+

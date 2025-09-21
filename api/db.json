@@ -1,0 +1,146 @@
+{
+  "produtos": [
+    {
+      "id": "2",
+      "nome": "Caneca Personalizada",
+      "preco": 29.9,
+      "categoria": "Acessórios"
+    },
+    {
+      "id": "3",
+      "nome": "Mouse Gamer",
+      "preco": 149.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "4",
+      "nome": "Livro Angular Essencial",
+      "preco": 89.9,
+      "categoria": "Livros"
+    },
+    {
+      "id": "5",
+      "nome": "Fone de Ouvido Bluetooth",
+      "preco": 199.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "6",
+      "nome": "Caderno de Anotações",
+      "preco": 19.9,
+      "categoria": "Papelaria"
+    },
+    {
+      "id": "7",
+      "nome": "Teclado Mecânico",
+      "preco": 249.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "8",
+      "nome": "Mochila para Notebook",
+      "preco": 129.9,
+      "categoria": "Acessórios"
+    },
+    {
+      "id": "9",
+      "nome": "Relógio Digital",
+      "preco": 99.9,
+      "categoria": "Acessórios"
+    },
+    {
+      "id": "10",
+      "nome": "Camiseta Angular",
+      "preco": 59.9,
+      "categoria": "Vestuário"
+    },
+    {
+      "id": "4b3e",
+      "nome": "Bosster",
+      "preco": 1111,
+      "categoria": "Livros"
+    },
+    {
+      "id": "77a3",
+      "nome": "Bosster1",
+      "preco": 9.99,
+      "categoria": "Papelaria"
+    },
+    {
+      "id": "9947",
+      "nome": "teste1",
+      "preco": 20,
+      "categoria": "Papelaria"
+    },
+    {
+      "id": null,
+      "nome": "aa",
+      "preco": 11.11,
+      "categoria": "Vestuário"
+    },
+    {
+      "id": null,
+      "nome": "11",
+      "preco": 1.11,
+      "categoria": "Vestuário"
+    },
+    {
+      "id": null,
+      "nome": "11",
+      "preco": 1.11,
+      "categoria": "Vestuário"
+    }
+  ],
+  "categorias": [
+    {
+      "id": "1",
+      "nome": "Eletrônicos"
+    },
+    {
+      "id": "2",
+      "nome": "Acessórios"
+    },
+    {
+      "id": "3",
+      "nome": "Livros"
+    },
+    {
+      "id": "4",
+      "nome": "Papelaria"
+    },
+    {
+      "id": "5",
+      "nome": "Vestuário"
+    },
+    {
+      "id": "6",
+      "nome": "Brinquedos"
+    },
+    {
+      "id": "7",
+      "nome": "Móveis"
+    },
+    {
+      "id": "8",
+      "nome": "Esportes"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "1",
+      "nome": "João Silva",
+      "email": "joao@gmail.com",
+      "telefone": "11999999999",
+      "endereco": "Rua A, 123, São Paulo, SP",
+      "commisao": 5
+    },
+    {
+      "id": "2",
+      "nome": "Maria Oliveira",
+      "email": "maria@gmai.com",
+      "telefone": "21988888888",
+      "endereco": "Avenida B, 456, Rio de Janeiro, RJ",
+      "commisao": 7
+    }
+  ]
+}

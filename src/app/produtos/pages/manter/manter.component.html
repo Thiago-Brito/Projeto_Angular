@@ -1,0 +1,59 @@
+<mat-card class="card container">
+  <div class="card-title">
+    <h1>Produtos</h1>
+    <div class="botoes">
+      <button mat-raised-button routerLink="/paginas/produtos/cadastro" color="primary">
+        <mat-icon>add</mat-icon>
+        Adicionar
+      </button>
+      <button mat-raised-button color="warn" (click)="deleteSelected()" [disabled]="!hasAnySelected() || loadingDelete">
+        <mat-icon>delete</mat-icon>
+        Excluir
+      </button>
+    </div>
+  </div>
+
+  <mat-form-field class="inputField">
+    <mat-label>Procure o produto</mat-label>
+    <input matInput placeholder="Ex. Booster" name="nomeBusca" [(ngModel)]="nomeBusca"
+      (ngModelChange)="filtrar()">
+  </mat-form-field>
+
+  <table mat-table [dataSource]="produtos" class="mat-elevation-z8">
+    <ng-container matColumnDef="check">
+      <th mat-header-cell *matHeaderCellDef>
+        <mat-checkbox [checked]="isAllSelected()" (change)="toggleMaster($event.checked)">
+          <span></span>
+        </mat-checkbox>
+      </th>
+      <td mat-cell *matCellDef="let produto">
+        <mat-checkbox [(ngModel)]="produto.selecionado" (click)="$event.stopPropagation()">
+          <span></span>
+        </mat-checkbox>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef> Nome </th>
+      <td mat-cell *matCellDef="let produto"  [routerLink]="['/paginas/produtos/cadastro']"
+       [queryParams]="{ id: produto.id }"> {{produto.nome}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="preco">
+      <th mat-header-cell *matHeaderCellDef> Preço </th>
+      <td mat-cell *matCellDef="let produto"  [routerLink]="['/paginas/produtos/cadastro']"
+       [queryParams]="{ id: produto.id }"> R$ {{produto.preco}} </td>
+    </ng-container>
+
+    <ng-container matColumnDef="categoria">
+      <th mat-header-cell *matHeaderCellDef> Categoria </th>
+      <td mat-cell *matCellDef="let produto"  [routerLink]="['/paginas/produtos/cadastro']"
+       [queryParams]="{ id: produto.id }"> {{produto.categoria}} </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+  <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons aria-label="Select page of periodic elements">
+  </mat-paginator>
+</mat-card>
