@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ManterComponent } from './pages/manter/manter.component';
+import { CadastroComponent } from './pages/cadastro/cadastro.component';
 
 const routes: Routes = [
    {
@@ -11,6 +12,10 @@ const routes: Routes = [
     {
       path: 'manter',
       component:ManterComponent,
+    },
+    {
+      path: 'cadastro',
+      component:CadastroComponent,
     }
 ];
 

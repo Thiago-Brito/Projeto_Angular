@@ -1,0 +1,62 @@
+<div class="container">
+  <mat-card class="card">
+    <div class="card-title">
+      <h1>{{titulo}}</h1>
+      <button mat-raised-button routerLink="/paginas/clientes" color="primary">
+        <mat-icon>arrow_back</mat-icon>
+        Voltar
+      </button>
+    </div>
+
+    <mat-tab-group *ngIf="isAlteracao">
+      <mat-tab label="Dados pessoais do clientes">
+        <ng-container *ngTemplateOutlet="formCliente"></ng-container>
+      </mat-tab>
+      <mat-tab label="Visitas">
+        <a href=""></a>
+      </mat-tab>
+    </mat-tab-group>
+
+    <ng-container *ngIf="!isAlteracao">
+      <ng-container *ngTemplateOutlet="formCliente"></ng-container>
+    </ng-container>
+
+    <ng-template #formCliente>
+      <form id="produtoForm" [formGroup]="camposForm" (ngSubmit)="salvar()">
+        <mat-form-field class="inputField">
+          <mat-label>Nome</mat-label>
+          <input matInput required placeholder="Ex. Booster" formControlName="nome" name="nome" />
+        </mat-form-field>
+        <span class="obrigatorio" *ngIf="isCampoInvalido('nome')">
+          Campo Obrigatório
+        </span>
+
+        <mat-form-field class="inputField">
+          <mat-label>Email</mat-label>
+          <input matInput required placeholder="Ex. BancaZapp@gmail.com" formControlName="email" name="email" />
+        </mat-form-field>
+        <span class="obrigatorio" *ngIf="isCampoInvalido('email')">
+          Campo Obrigatório
+        </span>
+
+        <mat-form-field class="inputField">
+          <mat-label>Telefone</mat-label>
+          <input matInput placeholder="Ex. (11) 99999-9999" formControlName="telefone" name="telefone" />
+        </mat-form-field>
+
+        <mat-form-field class="inputField">
+          <mat-label>Endereço</mat-label>
+          <input matInput placeholder="Ex. Rua das Flores, 123" formControlName="endereco" name="endereco" />
+        </mat-form-field>
+
+        <mat-form-field class="inputField">
+          <mat-label>Comissão padrão</mat-label>
+          <input matInput placeholder="Ex. 15" formControlName="comissao" name="comissao" type="number" />
+        </mat-form-field>
+
+        <button matButton="elevated" type="submit">{{botaoTexto}}</button>
+      </form>
+    </ng-template>
+
+  </mat-card>
+</div>

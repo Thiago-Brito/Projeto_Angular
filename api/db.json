@@ -103,7 +103,7 @@
       "email": "joao@gmail.com",
       "telefone": "11999999999",
       "endereco": "Rua A, 123, São Paulo, SP",
-      "commisao": 5
+      "comissao": 5
     },
     {
       "id": "2",
@@ -112,7 +112,7 @@
       "email": "maria@gmai.com",
       "telefone": "21988888888",
       "endereco": "Avenida B, 456, Rio de Janeiro, RJ",
-      "commisao": 7
+      "comissao": 7
     }
   ]
 }

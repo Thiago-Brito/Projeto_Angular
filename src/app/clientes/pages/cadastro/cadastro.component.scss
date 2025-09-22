@@ -1,0 +1,46 @@
+.card{
+    margin-top: 50px;
+    padding: 50px;
+    width: 700px;
+    align-items: center;
+    margin-bottom: 40px;
+    height: auto;
+}
+
+.card-title{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+
+}
+
+form{
+    width: 100%;
+    align-items: center;
+    text-align: center;
+    height: auto;
+}
+.inputField{
+    width: 100%;
+}
+.obrigatorio{
+    color: red;
+    font-size: 12px;
+    text-align: left;
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+button[type="submit"]{
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 20px;
+    margin-bottom: 10px;
+}
+button:hover[type="submit"]{
+    transform: scale(1.05);
+}
