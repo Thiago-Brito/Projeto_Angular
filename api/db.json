@@ -104,15 +104,6 @@
       "endereco": "Rua A, 123, São Paulo, SP",
       "localidade": "Recife",
       "comissao": 5
-    },
-    {
-      "id": "62cb",
-      "nome": "THIAGO BARBOSA",
-      "email": "brito.lol10@gmail.com",
-      "telefone": "81991848112",
-      "endereco": "Joaquim Nabuco, 529",
-      "localidade": "Recife",
-      "comissao": 10
     }
   ],
   "localidades": [
