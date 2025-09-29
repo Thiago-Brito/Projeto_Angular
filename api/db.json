@@ -1,0 +1,214 @@
+{
+  "produtos": [
+    {
+      "id": "2",
+      "nome": "Caneca Personalizada1",
+      "preco": 29.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "3",
+      "nome": "Mouse Gamer",
+      "preco": 149.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "4",
+      "nome": "Livro Angular Essencial",
+      "preco": 89.9,
+      "categoria": "Livros"
+    },
+    {
+      "id": "5",
+      "nome": "Fone de Ouvido Bluetooth",
+      "preco": 199.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "6",
+      "nome": "Caderno de Anotações",
+      "preco": 19.9,
+      "categoria": "Papelaria"
+    },
+    {
+      "id": "7",
+      "nome": "Teclado Mecânico",
+      "preco": 249.9,
+      "categoria": "Eletrônicos"
+    },
+    {
+      "id": "8",
+      "nome": "Mochila para Notebook",
+      "preco": 129.9,
+      "categoria": "Acessórios"
+    },
+    {
+      "id": "9",
+      "nome": "Relógio Digital",
+      "preco": 99.9,
+      "categoria": "Acessórios"
+    },
+    {
+      "id": "10",
+      "nome": "Camiseta Angular",
+      "preco": 59.9,
+      "categoria": "Vestuário"
+    },
+    {
+      "id": "4b3e",
+      "nome": "Bosster",
+      "preco": 1111,
+      "categoria": "Livros"
+    }
+  ],
+  "categorias": [
+    {
+      "id": "1",
+      "nome": "Eletrônicos"
+    },
+    {
+      "id": "2",
+      "nome": "Acessórios"
+    },
+    {
+      "id": "3",
+      "nome": "Livros"
+    },
+    {
+      "id": "4",
+      "nome": "Papelaria"
+    },
+    {
+      "id": "5",
+      "nome": "Vestuário"
+    },
+    {
+      "id": "6",
+      "nome": "Brinquedos"
+    },
+    {
+      "id": "7",
+      "nome": "Móveis"
+    },
+    {
+      "id": "8",
+      "nome": "Esportes"
+    }
+  ],
+  "clientes": [
+    {
+      "id": "1",
+      "nome": "João Silva",
+      "email": "joao@gmail.com",
+      "telefone": "11999999999",
+      "endereco": "Rua A, 123, São Paulo, SP",
+      "localidade": "Recife",
+      "comissao": 5
+    },
+    {
+      "id": "62cb",
+      "nome": "THIAGO BARBOSA",
+      "email": "brito.lol10@gmail.com",
+      "telefone": "81991848112",
+      "endereco": "Joaquim Nabuco, 529",
+      "localidade": "Recife",
+      "comissao": 10
+    }
+  ],
+  "localidades": [
+    {
+      "id": "1",
+      "nome": "Recife"
+    },
+    {
+      "id": "2",
+      "nome": "João Pessoa"
+    }
+  ],
+  "visita": [
+    {
+      "id": "da29",
+      "cliente_id": "1",
+      "data_visita": "2025-09-28",
+      "observacoes": "teste"
+    },
+    {
+      "id": "d2b5",
+      "cliente_id": "1",
+      "data_visita": "2025-09-28",
+      "observacoes": "Pediu mais bosster "
+    }
+  ],
+  "visita_item": [
+    {
+      "id": "ff6b",
+      "produto_id": "3",
+      "possuia": 5,
+      "entregue": 5,
+      "vendido": 5,
+      "retirado": 0,
+      "visita_id": "da29",
+      "possui_agora": 5
+    },
+    {
+      "id": "987b",
+      "produto_id": "4b3e",
+      "possuia": 10,
+      "entregue": 5,
+      "vendido": 5,
+      "retirado": 0,
+      "visita_id": "da29",
+      "possui_agora": 10
+    },
+    {
+      "id": "285a",
+      "produto_id": "3",
+      "possuia": 5,
+      "entregue": 10,
+      "vendido": 5,
+      "retirado": 0,
+      "visita_id": "d2b5",
+      "possui_agora": 10
+    },
+    {
+      "id": "a6c5",
+      "produto_id": "4b3e",
+      "possuia": 10,
+      "entregue": 0,
+      "vendido": 10,
+      "retirado": 0,
+      "visita_id": "d2b5",
+      "possui_agora": 0
+    },
+    {
+      "id": "a1fd",
+      "produto_id": "4",
+      "possuia": 0,
+      "entregue": 5,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "d2b5",
+      "possui_agora": 5
+    }
+  ],
+  "estoque_cliente": [
+    {
+      "id": "942a",
+      "cliente_id": "1",
+      "produto_id": "3",
+      "quantidade": 10
+    },
+    {
+      "id": "87fd",
+      "cliente_id": "1",
+      "produto_id": "4b3e",
+      "quantidade": 0
+    },
+    {
+      "id": "15ce",
+      "cliente_id": "1",
+      "produto_id": "4",
+      "quantidade": 5
+    }
+  ]
+}

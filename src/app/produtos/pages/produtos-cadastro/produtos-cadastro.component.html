@@ -1,0 +1,64 @@
+<div class="max-w-3xl mx-auto">
+  <p-toast></p-toast>
+  <p-card>
+    <div class="flex justify-between items-center mb-5">
+      <h1 class="text-2xl font-bold">{{ titulo }}</h1>
+
+      <p-button
+        label="Voltar"
+        icon="pi pi-arrow-left"
+        severity="secondary"
+          routerLink="/produtos">
+      </p-button>
+    </div>
+
+    <form [formGroup]="camposForm" (ngSubmit)="salvar()" class="flex flex-col gap-4">
+
+      <div>
+        <label class="block font-semibold mb-1">Nome *</label>
+        <input
+          pInputText
+          placeholder="Ex. Booster"
+          formControlName="nome"
+          class="w-full" />
+        <small *ngIf="isCampoInvalido('nome')" class="text-red-500">
+          Campo obrigatório
+        </small>
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-1">Preço *</label>
+        <p-inputNumber
+          formControlName="preco"
+          mode="currency"
+          currency="BRL"
+          locale="pt-BR"
+          placeholder="Ex. R$ 9,99"
+          class="w-full">
+        </p-inputNumber>
+        <small *ngIf="isCampoInvalido('preco')" class="text-red-500">
+          Campo obrigatório
+        </small>
+      </div>
+
+      <div>
+        <label class="block font-semibold mb-1">Categoria *</label>
+        <p-dropdown
+          [options]="categorias"
+          optionLabel="nome"
+          optionValue="nome"
+          placeholder="Selecione uma categoria"
+          formControlName="categoria"
+          class="w-full">
+        </p-dropdown>
+        <small *ngIf="isCampoInvalido('categoria')" class="text-red-500">
+          Campo obrigatório
+        </small>
+      </div>
+
+      <div class="mt-4 flex justify-end">
+        <p-button type="submit" label="{{ botaoTexto }}" icon="pi pi-save" severity="primary"></p-button>
+      </div>
+    </form>
+  </p-card>
+</div>

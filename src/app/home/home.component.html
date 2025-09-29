@@ -1,0 +1,16 @@
+<div class="grid grid-cols-2 gap-10 max-w-4xl mx-auto">
+    <p-card *ngFor="let c of cards" styleClass="
+        text-center 
+        cursor-pointer 
+        transition 
+        duration-300 
+        transform 
+        hover:scale-105 
+        hover:shadow-lg
+        "  [routerLink]="c.link">
+        <i [class]="c.icon + ' text-5xl text-blue-500 mb-3'"></i>
+        <h3 class="m-0 text-lg font-semibold">{{ c.title }}</h3>
+        <p class="m-0 text-gray-600">{{ c.subtitle }}</p>
+    </p-card>
+
+</div>
