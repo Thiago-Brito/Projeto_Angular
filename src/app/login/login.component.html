@@ -1,0 +1,27 @@
+<div class="flex m-0 min-h-screen justify-center items-center">
+    <p-toast></p-toast>
+    <p-card header="Login" styleClass="p-10 text-center">
+        <form [formGroup]="camposForm" (ngSubmit)="entrar()">
+            <div class="mb-5 mt-10 ">
+                <p-iftalabel>
+                    <input pInputText id="login" formControlName="login" autocomplete="off" class="w-full"
+                        pSize="small" />
+                    <label for="login">Login</label>
+                </p-iftalabel>
+                <small class="text-red-500 mb-0" *ngIf="isCampoInvalido('login')">Campo obrigatório</small>
+            </div>
+
+            <div class="mb-10">
+                <p-iftalabel>
+                    <p-password formControlName="senha" inputId="senha" [toggleMask]="true" size="small" />
+                    <label for="senha">Senha</label>
+                </p-iftalabel>
+                <small class="text-red-500" *ngIf="isCampoInvalido('senha')">Campo obrigatório</small>
+
+            </div>
+            <p-button styleClass="pb-0" label="Entrar" type="submit" />
+        </form>
+
+    </p-card>
+
+</div>

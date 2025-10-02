@@ -201,5 +201,16 @@
       "produto_id": "4",
       "quantidade": 5
     }
+  ],
+  "users": [
+    {
+      "id" :"1",
+      "nome" :"Jesus Junior",
+      "email": "bancazapp@gmail.com",
+      "login":"jesusJunior",
+      "senha": "1",
+      "cnpj": "05.574.800/0001-30"
+    }
   ]
+  
 }

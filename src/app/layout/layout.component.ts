@@ -4,7 +4,8 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { MenuModule } from 'primeng/menu';
 import { MenuItem } from 'primeng/api';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-layout',
@@ -15,6 +16,7 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 export class LayoutComponent {
    items: MenuItem[] | undefined;
 
+   constructor(private auth: AuthService, private router: Router) {}
     ngOnInit() {
         this.items = [
             {
@@ -36,9 +38,19 @@ export class LayoutComponent {
                     {
                         label: 'Configurações',
                         icon: 'pi pi-cog'
+                    },
+                    {
+                        label:'Sair',
+                        icon:'pi pi-sign-out',
+                        command: () => this.sair()
                     }
                 ]
             }
         ];
     }
+
+    sair() {
+    this.auth.logout();
+    this.router.navigate(['/login'])            
+  }
 }

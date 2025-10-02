@@ -520,15 +520,12 @@ export class ClientesCadastroComponent {
 
     this.visitasService.getCompleta(String(visitaId)).subscribe({
       next: ({ visita, itens }) => {
-        // Dados do cliente (já carregados no form)
-        const cliente = this.camposForm.getRawValue(); // nome, email, endereco, etc.
+        const cliente = this.camposForm.getRawValue(); 
         const dataBR = this.formatData(visita.data_visita);
 
-        // Mapa de produtos para preço/nome
         const prodById = new Map<string, Produto>();
         (this.produtos || []).forEach(p => prodById.set(String(p.id), p));
 
-        // Monta linhas e totais
         let totalGeral = 0;
         const linhas = (itens || []).map(it => {
           const prod = prodById.get(String(it.produto_id));
@@ -557,17 +554,14 @@ export class ClientesCadastroComponent {
           totalGeral
         });
 
-        // Abre janela de impressão
         const win = window.open('', '', 'width=920,height=700');
         if (!win) return;
         win.document.open();
         win.document.write(html);
         win.document.close();
-        // aguarda render e imprime
         win.focus();
         win.print();
-        // opcional: fechar depois de imprimir
-        // win.close();
+       
       },
       error: (e) => {
         console.error(e);
@@ -576,7 +570,6 @@ export class ClientesCadastroComponent {
     });
   }
 
-  // helpers
 
   private _moeda(v: number) {
     return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -594,101 +587,101 @@ export class ClientesCadastroComponent {
     totalGeral: number;
   }) {
     return `
-<!doctype html>
-<html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <title>Nota da Visita ${this._esc(ctx.visita.id)}</title>
-  <style>
-    @page { size: A4; margin: 14mm; }
-    * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-    body { color: #222; }
-    .nota { max-width: 800px; margin: 0 auto; }
-    .row { display: flex; gap: 16px; }
-    .col { flex: 1; }
-    h1 { margin: 0 0 8px; font-size: 20px; }
-    h2 { margin: 16px 0 8px; font-size: 16px; }
-    .muted { color: #666; font-size: 12px; }
-    .box { border: 1px solid #ddd; padding: 12px; border-radius: 6px; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ddd; padding: 6px 8px; font-size: 12px; }
-    th { background: #f6f6f6; text-align: left; }
-    .num { text-align: right; }
-    .total { font-weight: bold; font-size: 14px; }
-    .foot { margin-top: 16px; }
-    .right { text-align: right; }
-    .mb8 { margin-bottom: 8px; }
-    .mb16 { margin-bottom: 16px; }
-    .mb24 { margin-bottom: 24px; }
-    .titulo { display:flex; justify-content:space-between; align-items:flex-start; }
-    .linha { border-bottom: 1px solid #eee; margin: 8px 0 12px; }
-    @media print {
-      .no-print { display: none; }
-      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-  </style>
-</head>
-<body>
-  <div class="nota">
-    <div class="titulo">
-      <div>
-        <h1>${this._esc(ctx.empresa.nome)}</h1>
-        <div class="muted">${this._esc(ctx.empresa.endereco)} • CNPJ: ${this._esc(ctx.empresa.cnpj)}</div>
+  <!doctype html>
+  <html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <title>Nota da Visita ${this._esc(ctx.visita.id)}</title>
+    <style>
+      @page { size: A4; margin: 14mm; }
+      * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+      body { color: #222; }
+      .nota { max-width: 800px; margin: 0 auto; }
+      .row { display: flex; gap: 16px; }
+      .col { flex: 1; }
+      h1 { margin: 0 0 8px; font-size: 20px; }
+      h2 { margin: 16px 0 8px; font-size: 16px; }
+      .muted { color: #666; font-size: 12px; }
+      .box { border: 1px solid #ddd; padding: 12px; border-radius: 6px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+      th, td { border: 1px solid #ddd; padding: 6px 8px; font-size: 12px; }
+      th { background: #f6f6f6; text-align: left; }
+      .num { text-align: right; }
+      .total { font-weight: bold; font-size: 14px; }
+      .foot { margin-top: 16px; }
+      .right { text-align: right; }
+      .mb8 { margin-bottom: 8px; }
+      .mb16 { margin-bottom: 16px; }
+      .mb24 { margin-bottom: 24px; }
+      .titulo { display:flex; justify-content:space-between; align-items:flex-start; }
+      .linha { border-bottom: 1px solid #eee; margin: 8px 0 12px; }
+      @media print {
+        .no-print { display: none; }
+        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="nota">
+      <div class="titulo">
+        <div>
+          <h1>${this._esc(ctx.empresa.nome)}</h1>
+          <div class="muted">${this._esc(ctx.empresa.endereco)} • CNPJ: ${this._esc(ctx.empresa.cnpj)}</div>
+        </div>
+        <div class="right">
+          <div><strong>Nota da Visita</strong> #${this._esc(ctx.visita.id)}</div>
+          <div>${this._esc(ctx.visita.data)}</div>
+        </div>
       </div>
-      <div class="right">
-        <div><strong>Nota da Visita</strong> #${this._esc(ctx.visita.id)}</div>
-        <div>${this._esc(ctx.visita.data)}</div>
+
+      <div class="linha"></div>
+
+      <div class="row">
+        <div class="col box">
+          <h2>Cliente</h2>
+          <div class="mb8"><strong>${this._esc(ctx.cliente.nome)}</strong></div>
+          <div class="muted">${this._esc(ctx.cliente.endereco)}</div>
+          <div class="muted">${this._esc(ctx.cliente.localidade)}</div>
+          <div class="muted">${this._esc(ctx.cliente.email)} • ${this._esc(ctx.cliente.telefone)}</div>
+        </div>
+        <div class="col box">
+          <h2>Visita</h2>
+          <div><strong>Data:</strong> ${this._esc(ctx.visita.data)}</div>
+          <div class="mb8"><strong>Obs.:</strong> ${this._esc(ctx.visita.observacoes)}</div>
+        </div>
+      </div>
+
+      <h2 class="mb8">Itens negociados</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Produto</th>
+            <th class="num">Possuía</th>
+            <th class="num">Entregue</th>
+            <th class="num">Vendido</th>
+            <th class="num">Retirado</th>
+            <th class="num">Saldo</th>
+            <th class="num">Preço</th>
+            <th class="num">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${ctx.linhasHtml || `<tr><td colspan="8" class="muted">Sem itens</td></tr>`}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td class="right total" colspan="7">Total Geral</td>
+            <td class="num total">${this._moeda(ctx.totalGeral)}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <div class="foot muted">
+        <div class="mb8">Documento gerado automaticamente pelo sistema — ${this._esc(ctx.empresa.nome)}</div>
       </div>
     </div>
-
-    <div class="linha"></div>
-
-    <div class="row">
-      <div class="col box">
-        <h2>Cliente</h2>
-        <div class="mb8"><strong>${this._esc(ctx.cliente.nome)}</strong></div>
-        <div class="muted">${this._esc(ctx.cliente.endereco)}</div>
-        <div class="muted">${this._esc(ctx.cliente.localidade)}</div>
-        <div class="muted">${this._esc(ctx.cliente.email)} • ${this._esc(ctx.cliente.telefone)}</div>
-      </div>
-      <div class="col box">
-        <h2>Visita</h2>
-        <div><strong>Data:</strong> ${this._esc(ctx.visita.data)}</div>
-        <div class="mb8"><strong>Obs.:</strong> ${this._esc(ctx.visita.observacoes)}</div>
-      </div>
-    </div>
-
-    <h2 class="mb8">Itens negociados</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th class="num">Possuía</th>
-          <th class="num">Entregue</th>
-          <th class="num">Vendido</th>
-          <th class="num">Retirado</th>
-          <th class="num">Saldo</th>
-          <th class="num">Preço</th>
-          <th class="num">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${ctx.linhasHtml || `<tr><td colspan="8" class="muted">Sem itens</td></tr>`}
-      </tbody>
-      <tfoot>
-        <tr>
-          <td class="right total" colspan="7">Total Geral</td>
-          <td class="num total">${this._moeda(ctx.totalGeral)}</td>
-        </tr>
-      </tfoot>
-    </table>
-
-    <div class="foot muted">
-      <div class="mb8">Documento gerado automaticamente pelo sistema — ${this._esc(ctx.empresa.nome)}</div>
-    </div>
-  </div>
-</body>
-</html>
-`;
+  </body>
+  </html>
+  `;
   }
 }
