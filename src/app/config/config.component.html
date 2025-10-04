@@ -1,1 +1,82 @@
-<p>config works!</p>
+<p-card styleClass="p-4" header="">
+    <p-accordion >
+        <p-accordion-panel value="0">
+            <p-accordion-header>Dados Pessoais</p-accordion-header>
+            <p-accordion-content>
+                <ng-container *ngTemplateOutlet="formUsuario"></ng-container>
+            </p-accordion-content>
+        </p-accordion-panel>
+
+        <p-accordion-panel value="1">
+            <p-accordion-header>Localizações</p-accordion-header>
+            <p-accordion-content>
+                <p class="m-0">
+                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
+                    totam rem
+                    aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt
+                    explicabo. Nemo
+                    enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni
+                    dolores eos
+                    qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
+                </p>
+            </p-accordion-content>
+        </p-accordion-panel>
+
+        <p-accordion-panel value="2">
+            <p-accordion-header>Categorias</p-accordion-header>
+            <p-accordion-content>
+                <p class="m-0">
+                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium,
+                    totam rem
+                    aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt
+                    explicabo. Nemo
+                    enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni
+                    dolores eos
+                    qui ratione voluptatem sequi nesciunt. Consectetur, adipisci velit, sed quia non numquam eius modi.
+                </p>
+            </p-accordion-content>
+        </p-accordion-panel>
+    </p-accordion>
+
+    <ng-template #formUsuario>
+        <form class="w-full" [formGroup]="userForm" (ngSubmit)="salvar()">
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="nome">Nome *</label>
+                <input pInputText id="nome" formControlName="nome" placeholder="Ex. João da Silva" class="w-full" />
+                <small class="text-red-500" *ngIf="isCampoInvalido('nome', userForm)">Campo obrigatorio</small>
+            </div>
+
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="email">Email *</label>
+                <input pInputText id="email" formControlName="email" placeholder="Ex. joao@exemplo.com"
+                    class="w-full" />
+                <small class="text-red-500" *ngIf="isCampoInvalido('email',userForm)">Campo obrigatorio</small>
+            </div>
+
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="login">Login *</label>
+                <input pInputText id="login" formControlName="login" placeholder="Ex. joaosilva" class="w-full" />
+                <small class="text-red-500" *ngIf="isCampoInvalido('login', userForm)">Campo obrigatorio</small>
+            </div>
+
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="senha">Senha *</label>
+                <p-password id="senha" formControlName="senha" [feedback]="true" toggleMask
+                    placeholder="Mínimo 6 caracteres" inputStyleClass="w-full" styleClass="w-full">
+                </p-password>
+                <small class="text-red-500" *ngIf="isCampoInvalido('senha', userForm)">Campo obrigatorio</small>
+            </div>
+
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="cnpj">CNPJ *</label>
+                <p-inputMask id="cnpj" formControlName="cnpj" mask="99.999.999/9999-99" placeholder="00.000.000/0000-00"
+                    styleClass="w-full"></p-inputMask>
+                <small class="text-red-500" *ngIf="isCampoInvalido('cnpj', userForm)">Campo obrigatorio</small>
+            </div>
+
+            <div class="mt-4 flex justify-end">
+                <p-button type="submit" label="salvar" severity="success"></p-button>
+            </div>
+        </form>
+    </ng-template>
+</p-card>
