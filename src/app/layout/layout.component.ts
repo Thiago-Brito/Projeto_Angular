@@ -37,7 +37,8 @@ export class LayoutComponent {
                     },
                     {
                         label: 'Configurações',
-                        icon: 'pi pi-cog'
+                        icon: 'pi pi-cog',
+                        routerLink:'/config'
                     },
                     {
                         label:'Sair',
