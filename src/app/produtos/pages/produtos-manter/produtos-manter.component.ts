@@ -12,11 +12,14 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { forkJoin } from 'rxjs';
 import { Produto } from '../../../models/produto';
 import { ProdutoService } from '../../../services/produto.service';
+import { ToastModule } from "primeng/toast";
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-produtos-manter',
   standalone: true, 
   templateUrl: './produtos-manter.component.html',
+  providers: [MessageService],
   imports: [
     CommonModule,
     FormsModule,
@@ -26,7 +29,8 @@ import { ProdutoService } from '../../../services/produto.service';
     CardModule,
     InputTextModule,
     CheckboxModule,
-  ],
+    ToastModule
+],
 })
 export class ProdutosManterComponent  implements OnInit {
 
@@ -37,7 +41,7 @@ export class ProdutosManterComponent  implements OnInit {
   produtos: Produto[] = [];           
   selecionados: Produto[] = [];       
   
-  constructor(private service: ProdutoService) { }
+  constructor(private service: ProdutoService, private messageService: MessageService) { }
   
   ngOnInit(): void {
     this.service.obterTodos().subscribe({
@@ -66,11 +70,20 @@ export class ProdutosManterComponent  implements OnInit {
         const ids = new Set(this.selecionados.map(p => p.id));
         this.produtosOrigem = this.produtosOrigem.filter(p => !ids.has(p.id));
         this.filtrar();        
-        this.selecionados = []; 
+        this.selecionados = [];
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: 'Produto(s) deletado com sucesso!'
+          });
       },
       error: (err) => {
         console.error('Falha ao excluir em lote', err);
-        alert('Não foi possível excluir alguns itens.');
+         this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Falha ao deletar o produto.'
+          });
       },
       complete: () => (this.loadingDelete = false),
     });

@@ -45,7 +45,7 @@
 
                 <p-dialog [(visible)]="dialogAberto" [modal]="true"
                     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
-                    header="{{ editando ? 'Editar visita' : 'Nova visita' }}" [maximizable]="true">
+                    [header]="tituloDialog" [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
                         <div>
                             <label class="block mb-1">Data da visita</label>
@@ -71,7 +71,10 @@
                                         <th class="w-1px">Vendido</th>
                                         <th class="w-1px">Retirado</th>
                                         <th class="w-1px">Possui agora</th>
-                                        <th class="w-1px">Valor (R$)</th>
+                                        <th class="w-1px">Preço</th>
+                                        <th class="w-1px">Valor bruto</th>
+                                        <th class="w-1px">Desconto</th>
+                                        <th class="w-1px">A pagar</th>
                                         <th class="w-1px"></th>
                                     </tr>
                                 </ng-template>
@@ -115,10 +118,20 @@
                                                 class="w-15 items-center text-center" />
                                         </td>
 
-                                        <td>
-                                            <input pInputText type="text" formControlName="valor" readonly
-                                                class="w-20 text-center"
-                                                [value]="getItem(i).get('valor')?.value | currency:'BRL':'symbol':'1.2-2'" />
+                                       <td class="text-center">
+                                            {{getItem(i).get('preco')?.value | currency:'BRL':'symbol':'1.2-2'}}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{getItem(i).get('valorBruto')?.value | currency:'BRL':'symbol':'1.2-2'}}
+                                        </td>
+
+                                        <td class="text-center">
+                                        {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                        </td>
+
+                                        <td class="text-center">
+                                        {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
                                         </td>
 
                                         <td class="text-right">
@@ -138,6 +151,9 @@
                                         <td class="text-center!">{{ total('retirado') }}</td>
                                         <td class="text-center!">{{ total('possuiAgora') }}</td>
                                         <td class="text-center!"></td>
+                                        <td class="text-center!">{{ total('valorBruto') | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('desconto')   | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('valorPagar') | currency:'BRL':'symbol':'1.2-2' }}</td>
                                         <td class="text-center!"></td>
                                     </tr>
 

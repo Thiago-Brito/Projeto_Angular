@@ -74,6 +74,7 @@ export class ClientesCadastroComponent {
   titulo = 'Cadastrar cliente';
   botaoTexto = 'Cadastrar';
   localidades: Localidade[] = [];
+  tituloDialog = "Nova visita"
   produtos: Produto[] = [];
   private produtoById = new Map<String, Produto>();
 
@@ -222,6 +223,7 @@ export class ClientesCadastroComponent {
 
   abrirDialog(visita?: any) {
     this.dialogAberto = true;
+    this.tituloDialog = 'Nova visita';
     this.visitasForm.reset({
       id: null,
       observacoes: '',
@@ -252,7 +254,10 @@ export class ClientesCadastroComponent {
       vendido: new FormControl(0),
       retirado: new FormControl(0),
       possuiAgora: new FormControl({ value: 0, disabled: true }),
-      valor: new FormControl({ value: null, disabled: true })
+      preco:      new FormControl({ value: 0,  disabled: true }),
+      valorBruto: new FormControl({ value: 0,  disabled: true }),
+      desconto:   new FormControl({ value: 0,  disabled: true }),
+      valorPagar: new FormControl({ value: 0,  disabled: true }),
     });
 
     if (readonly) {
@@ -260,17 +265,17 @@ export class ClientesCadastroComponent {
     }
     return fg;
   }
+addItem() {
+  const item = this.criarItem(false);
+  this.itens.push(item);
+  const idx = this.itens.length - 1;
 
-  addItem() {
-    const item = this.criarItem(false);
-    this.itens.push(item);
-
-
-    item.get('produtoId')!.valueChanges.subscribe(id => {
-      const produto = this.produtos.find(p => p.id === id);
-      item.get('valor')!.setValue(produto ? produto.preco : null);
-    });
-  }
+  item.get('produtoId')!.valueChanges.subscribe(id => {
+    const prod = this.produtos.find(p => String(p.id) === String(id));
+    item.get('preco')!.setValue(prod ? prod.preco : 0, { emitEvent: false });
+    this.recalc(idx);
+  });
+}
 
   removeItem(index: number) {
     this.itens.removeAt(index);
@@ -280,23 +285,34 @@ export class ClientesCadastroComponent {
     return this.itens.at(index) as FormGroup;
   }
 
-  total(campo: 'possuia' | 'entregue' | 'vendido' | 'retirado' | 'possuiAgora'): number {
-    return this.itens.controls.reduce((sum, g) => {
-      const ctl = (g as FormGroup).get(campo);
-      return sum + this.n(ctl?.value);
-    }, 0);
+ total(campo: 'possuia' | 'entregue' | 'vendido' | 'retirado' | 'possuiAgora' | 'valorBruto' | 'desconto' | 'valorPagar'): number {
+  return this.itens.controls
+    .map((c: any) => Number(c.get(campo)?.value) || 0)
+    .reduce((a: number, b: number) => a + b, 0);
   }
 
-  recalc(index: number): void {
-    const g = this.itens.at(index) as FormGroup;
-    const possuia = this.n(g.get('possuia')?.value);
-    const entregue = this.n(g.get('entregue')?.value);
-    const vendido = this.n(g.get('vendido')?.value);
-    const retirado = this.n(g.get('retirado')?.value);
+ recalc(i: number): void {
+  const fg = this.getItem(i);
+  const possuia  = Number(fg.get('possuia')?.value)  || 0;
+  const entregue = Number(fg.get('entregue')?.value) || 0;
+  const vendido  = Number(fg.get('vendido')?.value)  || 0;
+  const retirado = Number(fg.get('retirado')?.value) || 0;
 
-    const agora = possuia + entregue - vendido - retirado;
-    g.get('possuiAgora')?.setValue(agora, { emitEvent: false });
-  }
+  const possuiAgora = Math.max(0, possuia + entregue - vendido - retirado);
+  fg.get('possuiAgora')?.setValue(possuiAgora, { emitEvent: false });
+
+  const preco = Number(fg.get('preco')?.value) || 0;
+  const valorBruto = vendido * preco;
+
+  const comissaoPct = (Number(this.camposForm.get('comissao')?.value) || 0) / 100;
+  const desconto = valorBruto * comissaoPct;
+  const valorPagar = valorBruto - desconto;
+
+  fg.get('valorBruto')?.setValue(valorBruto, { emitEvent: false });
+  fg.get('desconto')?.setValue(desconto, { emitEvent: false });
+  fg.get('valorPagar')?.setValue(valorPagar, { emitEvent: false });
+}
+
 
   salvarVisita() {
     this.visitasForm.markAllAsTouched();
@@ -356,6 +372,7 @@ export class ClientesCadastroComponent {
         });
         this.dialogAberto = false;
 
+        this.carregarTabelaVisitasCompletas(visita.cliente_id);
       },
       error: (e) => {
         console.error(e);
@@ -383,7 +400,7 @@ export class ClientesCadastroComponent {
     item.get('possuia')!.setValue(Math.max(0, Number(ec.quantidade || 0)), { emitEvent: false });
 
     const prod = this.produtoById.get(String(ec.produto_id));
-    item.get('valor')!.setValue(prod ? prod.preco : null, { emitEvent: false });
+    item.get('preco')!.setValue(prod ? prod.preco : null, { emitEvent: false });
 
     item.get('possuiAgora')!.setValue(item.get('possuia')!.value, { emitEvent: false });
 
@@ -469,6 +486,8 @@ export class ClientesCadastroComponent {
         const [y, m, d] = (visita.data_visita || '').split('-').map(Number);
         const dataLocal = !isNaN(y) ? new Date(y, (m ?? 1) - 1, d ?? 1) : new Date();
 
+        this.tituloDialog = `Visita – ${this.formatData(visita.data_visita)}`;
+
         this.visitasForm.patchValue({
           id: String(visita.id),
           observacoes: visita.observacoes || '',
@@ -484,9 +503,10 @@ export class ClientesCadastroComponent {
             vendido: it.vendido ?? 0,
             retirado: it.retirado ?? 0,
             possuiAgora: it.possui_agora ?? 0,
-            valor: this.produtos.find(p => String(p.id) === String(it.produto_id))?.preco ?? null
+            preco: this.produtos.find(p => String(p.id) === String(it.produto_id))?.preco ?? null
           }, { emitEvent: false });
           this.itens.push(g);
+          this.recalc(this.itens.length - 1);
         });
 
         this.setSomenteLeitura(true);
