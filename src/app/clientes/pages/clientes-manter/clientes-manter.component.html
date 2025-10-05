@@ -43,15 +43,15 @@
                     <a>{{ c.nome }}</a>
                 </td>
 
-                <td>
+                <td [routerLink]="['/clientes/cadastro']" [queryParams]="{ id: c.id }" style="cursor: pointer;">
                     <a>{{ c.localidade }}</a>
                 </td>
 
-                <td>
+                <td [routerLink]="['/clientes/cadastro']" [queryParams]="{ id: c.id }" style="cursor: pointer;">
                     <a>{{ c.email }}</a>
                 </td>
 
-                <td>
+                <td [routerLink]="['/clientes/cadastro']" [queryParams]="{ id: c.id }" style="cursor: pointer;">
                     <a>{{ c.telefone }}</a>
                 </td>
             </tr>
