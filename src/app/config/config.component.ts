@@ -10,11 +10,14 @@ import { InputMaskModule } from 'primeng/inputmask';
 import { ButtonModule } from 'primeng/button';
 import { AuthService } from '../services/auth.service';
 import { User } from '../models/user';
+import { ToastModule } from "primeng/toast";
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-config',
+  providers: [MessageService],
   imports: [
-    AccordionModule, 
+    AccordionModule,
     CardModule,
     CommonModule,
     ReactiveFormsModule,
@@ -22,14 +25,20 @@ import { User } from '../models/user';
     PasswordModule,
     InputMaskModule,
     ButtonModule,
-  ],
+    ToastModule
+
+],
   templateUrl: './config.component.html',
   styles: ``
 })
 export class ConfigComponent {
    userForm: FormGroup;
 
-  constructor(private userService : UserService, private authService: AuthService){
+  constructor(
+    private userService : UserService, 
+    private authService: AuthService,
+    private messageService: MessageService,
+  ){
     this.userForm = new FormGroup({
       id: new FormControl(null),
       nome: new FormControl('', Validators.required),
@@ -59,6 +68,16 @@ export class ConfigComponent {
   }
 
   salvar(){
-
+    if(this.userForm.valid){
+      this.userService.editar(this.userForm.value).subscribe({
+        next: user =>{
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Seus dados foram atualizado com sucesso!'
+            });
+        }
+      })
+    }
   }
 }

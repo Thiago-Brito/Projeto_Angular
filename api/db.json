@@ -57,8 +57,8 @@
     {
       "id": "4b3e",
       "nome": "Bosster",
-      "preco": 1111,
-      "categoria": "Livros"
+      "preco": 12.5,
+      "categoria": "Brinquedos"
     }
   ],
   "categorias": [
@@ -103,7 +103,16 @@
       "telefone": "11999999999",
       "endereco": "Rua A, 123, São Paulo, SP",
       "localidade": "Recife",
-      "comissao": 5
+      "comissao": 30
+    },
+    {
+      "id": "7d7d",
+      "nome": "THIAGO BARBOSA",
+      "email": "brito.lol10@gmail.com",
+      "telefone": "81991848112",
+      "endereco": "Joaquim Nabuco, 529",
+      "localidade": "Recife",
+      "comissao": 30
     }
   ],
   "localidades": [
@@ -128,6 +137,42 @@
       "cliente_id": "1",
       "data_visita": "2025-09-28",
       "observacoes": "Pediu mais bosster "
+    },
+    {
+      "id": "8e35",
+      "cliente_id": "1",
+      "data_visita": "2025-10-05",
+      "observacoes": ""
+    },
+    {
+      "id": "232d",
+      "cliente_id": "1",
+      "data_visita": "2025-10-05",
+      "observacoes": ""
+    },
+    {
+      "id": "4650",
+      "cliente_id": "1",
+      "data_visita": "2025-10-05",
+      "observacoes": ""
+    },
+    {
+      "id": "e0cb",
+      "cliente_id": "1",
+      "data_visita": "2025-10-05",
+      "observacoes": "teste"
+    },
+    {
+      "id": "5577",
+      "cliente_id": "7d7d",
+      "data_visita": "2025-10-05",
+      "observacoes": "Pediu tal produto na proxima visita"
+    },
+    {
+      "id": "c946",
+      "cliente_id": "7d7d",
+      "data_visita": "2025-10-05",
+      "observacoes": ""
     }
   ],
   "visita_item": [
@@ -180,6 +225,116 @@
       "retirado": 0,
       "visita_id": "d2b5",
       "possui_agora": 5
+    },
+    {
+      "id": "44c3",
+      "produto_id": "3",
+      "possuia": 10,
+      "entregue": 0,
+      "vendido": 10,
+      "retirado": 0,
+      "visita_id": "8e35",
+      "possui_agora": 0
+    },
+    {
+      "id": "2e53",
+      "produto_id": "4",
+      "possuia": 5,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "8e35",
+      "possui_agora": 5
+    },
+    {
+      "id": "0789",
+      "produto_id": "2",
+      "possuia": 3,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "232d",
+      "possui_agora": 3
+    },
+    {
+      "id": "850f",
+      "produto_id": "4",
+      "possuia": 5,
+      "entregue": 0,
+      "vendido": 2,
+      "retirado": 0,
+      "visita_id": "4650",
+      "possui_agora": 3
+    },
+    {
+      "id": "faf3",
+      "produto_id": "2",
+      "possuia": 3,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "4650",
+      "possui_agora": 3
+    },
+    {
+      "id": "acc2",
+      "produto_id": "4",
+      "possuia": 3,
+      "entregue": 0,
+      "vendido": 2,
+      "retirado": 0,
+      "visita_id": "e0cb",
+      "possui_agora": 1
+    },
+    {
+      "id": "f42c",
+      "produto_id": "2",
+      "possuia": 3,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "e0cb",
+      "possui_agora": 3
+    },
+    {
+      "id": "9ebd",
+      "produto_id": "4b3e",
+      "possuia": 5,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "5577",
+      "possui_agora": 5
+    },
+    {
+      "id": "6bf0",
+      "produto_id": "10",
+      "possuia": 7,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "5577",
+      "possui_agora": 7
+    },
+    {
+      "id": "2e1a",
+      "produto_id": "4b3e",
+      "possuia": 5,
+      "entregue": 0,
+      "vendido": 4,
+      "retirado": 0,
+      "visita_id": "c946",
+      "possui_agora": 1
+    },
+    {
+      "id": "17ea",
+      "produto_id": "10",
+      "possuia": 7,
+      "entregue": 0,
+      "vendido": 0,
+      "retirado": 0,
+      "visita_id": "c946",
+      "possui_agora": 7
     }
   ],
   "estoque_cliente": [
@@ -187,7 +342,7 @@
       "id": "942a",
       "cliente_id": "1",
       "produto_id": "3",
-      "quantidade": 10
+      "quantidade": 0
     },
     {
       "id": "87fd",
@@ -199,18 +354,35 @@
       "id": "15ce",
       "cliente_id": "1",
       "produto_id": "4",
-      "quantidade": 5
+      "quantidade": 1
+    },
+    {
+      "id": "3338",
+      "cliente_id": "1",
+      "produto_id": "2",
+      "quantidade": 3
+    },
+    {
+      "id": "5cca",
+      "cliente_id": "7d7d",
+      "produto_id": "4b3e",
+      "quantidade": 1
+    },
+    {
+      "id": "f0e4",
+      "cliente_id": "7d7d",
+      "produto_id": "10",
+      "quantidade": 7
     }
   ],
   "users": [
     {
-      "id" :"1",
-      "nome" :"Jesus Junior",
+      "id": "1",
+      "nome": "Jesus Junior",
       "email": "bancazapp@gmail.com",
-      "login":"jesusJunior",
+      "login": "jesusJunior",
       "senha": "1",
       "cnpj": "05.574.800/0001-30"
     }
   ]
-  
 }
