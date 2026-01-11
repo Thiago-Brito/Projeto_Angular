@@ -26,7 +26,7 @@ export class VisitaItemService {
   }
 
   salvar(item: VisitaItem): Observable<VisitaItem> {
-    return this.http.post<VisitaItem>(`${this.apiUrl}/${item.visita_id}/itens`, item);
+    return this.http.post<VisitaItem>(`${this.apiUrl}/${item.visitaId}/itens`, item);
   }
 
   editar(item: VisitaItem): Observable<VisitaItem> {

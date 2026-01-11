@@ -1,10 +1,20 @@
+import type { VisitaTipo } from './visita';
+
 export interface VisitaItem {
   id?: string;
-  visita_id: string;
-  produto_id: string;
-  possuia: number;
+  visitaId?: string;
+  produtoId: number | string;
+  possuia?: number;
+  possua?: number;
   entregue: number;
   vendido: number;
   retirado: number;
-  possui_agora: number;
+  possuiAgora?: number;
+  tipo?: VisitaTipo;
+}
+
+export interface VisitaItemLegacy {
+  visita_id?: string;
+  produto_id?: number | string;
+  possui_agora?: number;
 }

@@ -24,7 +24,7 @@ export class EstoqueClienteService {
       .get<EstoqueCliente[]>(`${this.apiUrl}/cliente/${clienteId}`)
       .pipe(
         map((lista) =>
-          (lista || []).filter((ec) => String(ec.produto_id) === String(produtoId))
+          (lista || []).filter((ec) => String(ec.produtoId) === String(produtoId))
         )
       );
   }

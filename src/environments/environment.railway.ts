@@ -1,4 +1,4 @@
 export const environment = {
-  production: true,
+  production: false,
   apiBaseUrl: 'https://backbancazapp-production.up.railway.app/api/v1'
 };

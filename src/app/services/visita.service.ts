@@ -1,10 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, from, concatMap, map, switchMap, toArray, forkJoin, of } from 'rxjs';
-import { Visita } from '../models/visita';
-import { EstoqueClienteService } from './estoque-cliente.service';
+import { Observable, map, of, switchMap } from 'rxjs';
+import { Visita, VisitaPayload } from '../models/visita';
 import { VisitaItemService } from './visita-item.service';
-import { VisitaItem } from '../models/visita-item';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -16,8 +14,7 @@ export class VisitasService {
 
   constructor(
     private http: HttpClient,
-    private visitaItemService: VisitaItemService,
-    private estoqueClienteService: EstoqueClienteService
+    private visitaItemService: VisitaItemService
   ) {}
 
   obterTodos(): Observable<Visita[]> {
@@ -31,7 +28,7 @@ export class VisitasService {
   filtrar(clienteId?: string, data?: string): Observable<Visita[]> {
     const url = clienteId ? `${this.apiUrl}/cliente/${clienteId}` : this.apiUrl;
     let params = new HttpParams();
-    if (data) params = params.set('data_visita', data);
+    if (data) params = params.set('dataVisita', data);
     return this.http.get<Visita[]>(url, { params });
   }
 
@@ -47,59 +44,28 @@ export class VisitasService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  salvarCompleto(
-    visita: Omit<Visita, 'id'>,
-    itensEntrada: Omit<VisitaItem, 'id' | 'visita_id' | 'possui_agora'>[]
-  ): Observable<{ visitaId: string }> {
+  salvarCompleto(payload: VisitaPayload): Observable<{ visitaId: string }> {
+    return this.http.post<Visita>(this.apiUrl, payload).pipe(
+      map((novaVisita) => ({ visitaId: String(novaVisita.id ?? '') }))
+    );
+  }
 
-    return this.salvar(visita).pipe(
-      switchMap(novaVisita => {
-        const visitaId = novaVisita.id!;
-
-        return from(itensEntrada).pipe(
-          concatMap(it => {
-            const possui_agora = it.possuia + it.entregue - it.vendido - it.retirado;
-            if (possui_agora < 0) throw new Error(`possui_agora negativo para produto ${it.produto_id}`);
-
-            const itemPayload: VisitaItem = {
-              ...it,
-              visita_id: visitaId,
-              possui_agora
-            };
-
-            return this.visitaItemService.salvar(itemPayload).pipe(
-             
-              switchMap(() =>
-                this._definirEstoqueCliente(visita.cliente_id, it.produto_id, possui_agora)
-              )
-            );
-          }),
-          toArray(),
-          map(() => ({ visitaId }))
+  getCompleta(id: string) {
+    return this.carregar(id).pipe(
+      switchMap((visita) => {
+        if (visita.itens && visita.itens.length > 0) {
+          return of({ visita, itens: visita.itens });
+        }
+        return this.visitaItemService.porVisita(id).pipe(
+          map((itens) => ({ visita, itens }))
         );
       })
     );
   }
 
- 
-
-  private _definirEstoqueCliente(clienteId: string, produtoId: string, quantidade: number) {
-    return this.estoqueClienteService.porClienteProduto(clienteId, produtoId).pipe(
-      switchMap(regs => {
-        const reg = regs[0];
-        if (reg) {
-          return this.estoqueClienteService.editar({ ...reg, quantidade });
-        } else {
-          return this.estoqueClienteService.salvar({ cliente_id: clienteId, produto_id: produtoId, quantidade });
-        }
-      })
-    );
-  }
-
-  getCompleta(id: string) {
-    return forkJoin({
-      visita: this.carregar(id),
-      itens: this.visitaItemService.porVisita(id)
+  getNotaConferencia(id: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/${id}/nota-conferencia?formato=80mm`, {
+      responseType: 'blob'
     });
   }
 

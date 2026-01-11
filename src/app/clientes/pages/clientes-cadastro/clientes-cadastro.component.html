@@ -18,13 +18,19 @@
             </p-tabpanel>
 
             <p-tabpanel value="1">
-                <p-button label="Adicionar visita" icon="pi pi-plus" (onClick)="abrirDialog()"></p-button>
+                <div class="flex gap-2 mb-3">
+                    <p-button label="Nova Venda" icon="pi pi-shopping-cart" (onClick)="abrirDialogVenda()"></p-button>
+                    <p-button label="Entrega / Devolução" icon="pi pi-truck" severity="info"
+                        (onClick)="abrirDialogEstoque()"></p-button>
+                    <p-button label="Detalhes do Estoque" icon="pi pi-box" severity="secondary"
+                        (onClick)="abrirDialogEstoqueCliente()"></p-button>
+                </div>
                 <p-table [value]="visitasRows" [loading]="loadingVisitas" [paginator]="true" [rows]="10"
                     [responsiveLayout]="'scroll'">
                     <ng-template pTemplate="header">
                         <tr>
                             <th class="w-12rem">Data</th>
-                            <th>Observações</th>
+                            <th class="w-10rem">Tipo</th>
                             <th class="text-center!">Produtos distintos</th>
                             <th class="text-center!">Ações</th>
                         </tr>
@@ -32,8 +38,8 @@
 
                     <ng-template pTemplate="body" let-r>
                         <tr >
-                            <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ formatData(r.data_visita) }}</td>
-                            <td (click)="abrirDetalhe(r)"class="cursor-pointer">{{ r.observacoes || '-' }}</td>
+                            <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ formatData(r.dataVisita) }}</td>
+                            <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ r.tipo || '-' }}</td>
                             <td (click)="abrirDetalhe(r)" class="cursor-pointer text-center!">{{ r.qtdProdutosDistintos }}</td>
                             <td class="text-center!">
                                 <button pButton icon="pi pi-print" class="p-button-text"
@@ -43,7 +49,212 @@
                     </ng-template>
                 </p-table>
 
-                <p-dialog [(visible)]="dialogAberto" [modal]="true"
+                <p-dialog [(visible)]="dialogVendaAberto" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+                    [header]="tituloDialogVenda" [maximizable]="true">
+                    <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
+                        <div>
+                            <label class="block mb-1">Data da visita</label>
+                            <p-datepicker formControlName="data" dateFormat="dd/mm/yy" [showIcon]="true"></p-datepicker>
+                        </div>
+
+                        <div>
+                            <label class="block mb-1">Observações</label>
+                            <textarea class="w-150 resize-none" pInputTextarea rows="3"
+                                formControlName="observacoes"></textarea>
+                        </div>
+
+                        <p-button severity="info" label="Adicionar produto" (onClick)="addItemVenda()" icon="pi pi-plus"
+                            [disabled]="somenteLeitura"></p-button>
+
+                        <div formArrayName="itens">
+                            <p-table [value]="itens.controls" dataKey="id">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th class="w-1px">Produto</th>
+                                        <th class="w-1px">Vendido</th>
+                                        <th class="w-1px">Preço</th>
+                                        <th class="w-1px">Valor bruto</th>
+                                        <th class="w-1px">Desconto</th>
+                                        <th class="w-1px">A pagar</th>
+                                        <th class="w-1px"></th>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="body" let-row let-i="rowIndex">
+                                    <tr [formGroupName]="i">
+                                        <td>
+                                            <p-select formControlName="produtoId" name="produto" [options]="produtos"
+                                                optionLabel="nome" optionValue="id" [filter]="true" filterBy="nome"
+                                                [showClear]="true" placeholder="Selecione um produto"
+                                                panelStyleClass="top-auto! bottom-full! origin-bottom! -translate-y-11"
+                                                appendTo="body">
+                                                <ng-template pTemplate="selectedItem" let-selectedOption>
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ selectedOption?.nome }}</div>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template pTemplate="item" let-produto>
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ produto.nome }}</div>
+                                                    </div>
+                                                </ng-template>
+                                            </p-select>
+                                        </td>
+
+                                        <td><input pInputText type="number" min="0" formControlName="vendido"
+                                                (input)="recalc(i)" class="w-15" />
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{getItem(i).get('preco')?.value | currency:'BRL':'symbol':'1.2-2'}}
+                                        </td>
+
+                                        <td class="text-center">
+                                            {{getItem(i).get('valorBruto')?.value | currency:'BRL':'symbol':'1.2-2'}}
+                                        </td>
+
+                                        <td class="text-center">
+                                        {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                        </td>
+
+                                        <td class="text-center">
+                                        {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                        </td>
+
+                                        <td class="text-right">
+                                            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger"
+                                                type="button" (click)="removeItem(i)"
+                                                [disabled]="somenteLeitura"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="footer">
+                                    <tr>
+                                        <td class="text-left font-medium">Totais</td>
+                                        <td class="text-center!">{{ total('vendido') }}</td>
+                                        <td class="text-center!"></td>
+                                        <td class="text-center!">{{ total('valorBruto') | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('desconto')   | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('valorPagar') | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!"></td>
+                                    </tr>
+
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                        <div class="flex justify-self-start gap-2 mt-10">
+                            <p-button severity="danger" label="Cancelar" class="p-button-text"
+                                (onClick)="fecharDialogVenda()"></p-button>
+                            <p-button severity="success" label="Salvar" icon="pi pi-check"
+                                [disabled]="somenteLeitura || visitasForm.invalid || itens.length === 0"
+                                (onClick)="salvarVenda()"></p-button>
+                        </div>
+                    </form>
+                </p-dialog>
+
+                <p-dialog [(visible)]="dialogEstoqueAberto" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+                    [header]="tituloDialogEstoque" [maximizable]="true">
+                    <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
+                        <div>
+                            <label class="block mb-1">Data da visita</label>
+                            <p-datepicker formControlName="data" dateFormat="dd/mm/yy" [showIcon]="true"></p-datepicker>
+                        </div>
+
+                        <div>
+                            <label class="block mb-1">Observações</label>
+                            <textarea class="w-150 resize-none" pInputTextarea rows="3"
+                                formControlName="observacoes"></textarea>
+                        </div>
+
+                        <p-button severity="info" label="Adicionar produto" (onClick)="addItemEstoque()" icon="pi pi-plus"
+                            [disabled]="somenteLeitura"></p-button>
+
+                        <div formArrayName="itens">
+                            <p-table [value]="itens.controls" dataKey="id">
+                                <ng-template pTemplate="header">
+                                    <tr>
+                                        <th class="w-1px">Produto</th>
+                                        <th class="w-1px">Possuia</th>
+                                        <th class="w-1px">Entregue</th>
+                                        <th class="w-1px">Retirado</th>
+                                        <th class="w-1px">Possui agora</th>
+                                        <th class="w-1px"></th>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="body" let-row let-i="rowIndex">
+                                    <tr [formGroupName]="i">
+                                        <td>
+                                            <p-select formControlName="produtoId" name="produto" [options]="produtos"
+                                                optionLabel="nome" optionValue="id" [filter]="true" filterBy="nome"
+                                                [showClear]="true" placeholder="Selecione um produto"
+                                                panelStyleClass="top-auto! bottom-full! origin-bottom! -translate-y-11"
+                                                appendTo="body">
+                                                <ng-template pTemplate="selectedItem" let-selectedOption>
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ selectedOption?.nome }}</div>
+                                                    </div>
+                                                </ng-template>
+                                                <ng-template pTemplate="item" let-produto>
+                                                    <div class="flex items-center gap-2">
+                                                        <div>{{ produto.nome }}</div>
+                                                    </div>
+                                                </ng-template>
+                                            </p-select>
+                                        </td>
+
+                                        <td><input pInputText type="number" min="0" formControlName="possuia"
+                                                (input)="recalc(i)" class="w-15" />
+                                        </td>
+                                        <td><input pInputText type="number" min="0" formControlName="entregue"
+                                                (input)="recalc(i)" class="w-15" />
+                                        </td>
+                                        <td><input pInputText type="number" min="0" formControlName="retirado"
+                                                (input)="recalc(i)" class="w-15" />
+                                        </td>
+
+                                        <td class="flex justify-center">
+                                            <input pInputText formControlName="possuiAgora" readonly
+                                                class="w-15 items-center text-center" />
+                                        </td>
+
+                                        <td class="text-right">
+                                            <button pButton icon="pi pi-trash" class="p-button-text p-button-danger"
+                                                type="button" (click)="removeItem(i)"
+                                                [disabled]="somenteLeitura"></button>
+                                        </td>
+                                    </tr>
+                                </ng-template>
+
+                                <ng-template pTemplate="footer">
+                                    <tr>
+                                        <td class="text-left font-medium">Totais</td>
+                                        <td class="text-center!">{{ total('possuia') }}</td>
+                                        <td class="text-center!">{{ total('entregue') }}</td>
+                                        <td class="text-center!">{{ total('retirado') }}</td>
+                                        <td class="text-center!">{{ total('possuiAgora') }}</td>
+                                        <td class="text-center!"></td>
+                                    </tr>
+
+                                </ng-template>
+                            </p-table>
+                        </div>
+
+                        <div class="flex justify-self-start gap-2 mt-10">
+                            <p-button severity="danger" label="Cancelar" class="p-button-text"
+                                (onClick)="fecharDialogEstoque()"></p-button>
+                            <p-button severity="success" label="Salvar" icon="pi pi-check"
+                                [disabled]="somenteLeitura || visitasForm.invalid || itens.length === 0"
+                                (onClick)="salvarEstoque()"></p-button>
+                        </div>
+                    </form>
+                </p-dialog>
+
+                <p-dialog [(visible)]="dialogDetalheAberto" [modal]="true"
                     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
                     [header]="tituloDialog" [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
@@ -57,9 +268,6 @@
                             <textarea class="w-150 resize-none" pInputTextarea rows="3"
                                 formControlName="observacoes"></textarea>
                         </div>
-
-                        <p-button severity="info" label="Adicionar produto" (onClick)="addItem()" icon="pi pi-plus"
-                            [disabled]="somenteLeitura"></p-button>
 
                         <div formArrayName="itens">
                             <p-table [value]="itens.controls" dataKey="id">
@@ -162,13 +370,50 @@
                         </div>
 
                         <div class="flex justify-self-start gap-2 mt-10">
-                            <p-button severity="danger" label="Cancelar" class="p-button-text"
-                                (onClick)="fecharDialog()"></p-button>
-                            <p-button severity="success" label="Salvar" icon="pi pi-check"
-                                [disabled]="somenteLeitura || visitasForm.invalid || itens.length === 0"
-                                (onClick)="salvarVisita()"></p-button>
+                            <p-button severity="secondary" label="Fechar" class="p-button-text"
+                                (onClick)="fecharDialogDetalhe()"></p-button>
                         </div>
                     </form>
+                </p-dialog>
+
+                <p-dialog [(visible)]="dialogEstoqueClienteAberto" [modal]="true"
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
+                    [header]="'Produtos em Posse'" [maximizable]="true">
+                    <div class="grid gap-3 min-h-fit">
+                        <p-table [value]="estoqueClienteRows" [loading]="loadingEstoqueCliente"
+                            [responsiveLayout]="'scroll'">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th>Produto</th>
+                                    <th class="text-center!">Quantidade</th>
+                                    <th class="text-center!">Preço</th>
+                                    <th class="text-center!">Valor total</th>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="body" let-r>
+                                <tr>
+                                    <td>{{ r.produtoNome }}</td>
+                                    <td class="text-center!">{{ r.quantidade }}</td>
+                                    <td class="text-center!">{{ r.preco | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                    <td class="text-center!">{{ r.total | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                </tr>
+                            </ng-template>
+
+                            <ng-template pTemplate="emptymessage">
+                                <tr>
+                                    <td colspan="4" class="text-center text-gray-500">
+                                        Este cliente não possui produtos em estoque no momento.
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+
+                        <div class="flex justify-self-start gap-2 mt-4">
+                            <p-button severity="secondary" label="Fechar" class="p-button-text"
+                                (onClick)="fecharDialogEstoqueCliente()"></p-button>
+                        </div>
+                    </div>
                 </p-dialog>
             </p-tabpanel>
         </p-tabpanels>

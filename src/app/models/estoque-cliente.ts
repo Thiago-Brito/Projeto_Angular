@@ -1,6 +1,6 @@
 export interface EstoqueCliente {
-  id?: string;
-  cliente_id: string;
-  produto_id: string;
+  id?: number;
+  clienteId: number;
+  produtoId: number;
   quantidade: number;
 }

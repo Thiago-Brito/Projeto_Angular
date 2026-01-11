@@ -25,15 +25,16 @@ import { VisitasService } from '../../../services/visita.service';
 import { EstoqueCliente } from '../../../models/estoque-cliente';
 import { EstoqueClienteService } from '../../../services/estoque-cliente.service';
 import { TreeTableModule } from 'primeng/treetable';
-import { Visita } from '../../../models/visita';
-import { VisitaItem } from '../../../models/visita-item';
+import { Visita, VisitaPayload, VisitaTipo } from '../../../models/visita';
+import { VisitaItem, VisitaItemLegacy } from '../../../models/visita-item';
 import { VisitaItemService } from '../../../services/visita-item.service';
 import { forkJoin, of, switchMap } from 'rxjs';
 
 
 type VisitaRow = {
   id: string;
-  data_visita: string;
+  dataVisita: string;
+  tipo: string;
   observacoes: string;
   qtdProdutosDistintos: number;
 };
@@ -75,18 +76,26 @@ export class ClientesCadastroComponent {
   botaoTexto = 'Cadastrar';
   localidades: Localidade[] = [];
   tituloDialog = "Nova visita"
+  tituloDialogVenda = 'Nova venda';
+  tituloDialogEstoque = 'Entrega / Devolução';
   produtos: Produto[] = [];
   private produtoById = new Map<String, Produto>();
 
   visitasRows: VisitaRow[] = [];
   loadingVisitas = false;
+  estoqueClienteRows: Array<{ produtoId: string; produtoNome: string; quantidade: number; preco: number; total: number }> = [];
+  loadingEstoqueCliente = false;
 
   somenteLeitura = false;
 
 
 
-  dialogAberto = false;
+  dialogVendaAberto = false;
+  dialogEstoqueAberto = false;
+  dialogDetalheAberto = false;
+  dialogEstoqueClienteAberto = false;
   editando = false;
+  private estoqueByProdutoId = new Map<string, number>();
 
 
 
@@ -230,9 +239,25 @@ export class ClientesCadastroComponent {
     return campo?.invalid && campo?.touched && campo?.errors?.['required']
   }
 
-  abrirDialog(visita?: any) {
-    this.dialogAberto = true;
-    this.tituloDialog = 'Nova visita';
+  abrirDialogVenda() {
+    this.prepararDialog('venda');
+  }
+
+  abrirDialogEstoque() {
+    this.prepararDialog('estoque');
+  }
+
+  private prepararDialog(tipo: 'venda' | 'estoque') {
+    this.dialogVendaAberto = tipo === 'venda';
+    this.dialogEstoqueAberto = tipo === 'estoque';
+    this.dialogDetalheAberto = false;
+
+    if (tipo === 'venda') {
+      this.tituloDialogVenda = 'Nova venda';
+    } else {
+      this.tituloDialogEstoque = 'Entrega / Devolução';
+    }
+
     this.visitasForm.reset({
       id: null,
       observacoes: '',
@@ -243,12 +268,39 @@ export class ClientesCadastroComponent {
 
     const clienteId = String(this.camposForm.get('id')?.value || '');
     if (clienteId) {
-      this.preencherItensComConsignado(clienteId);
+      if (tipo === 'estoque') {
+        this.carregarEstoqueCliente(clienteId, true, 'estoque');
+      } else {
+        this.carregarEstoqueCliente(clienteId, true, 'venda');
+      }
+    } else if (tipo === 'estoque') {
+      this.addItemEstoque();
+    } else {
+      this.addItemVenda();
     }
   }
 
-  fecharDialog(visita?: any) {
-    this.dialogAberto = false;
+  fecharDialogVenda() {
+    this.dialogVendaAberto = false;
+  }
+
+  fecharDialogEstoque() {
+    this.dialogEstoqueAberto = false;
+  }
+
+  fecharDialogDetalhe() {
+    this.dialogDetalheAberto = false;
+  }
+
+  abrirDialogEstoqueCliente() {
+    const clienteId = String(this.camposForm.get('id')?.value || '');
+    if (!clienteId) return;
+    this.dialogEstoqueClienteAberto = true;
+    this.carregarEstoqueClienteAtual(clienteId);
+  }
+
+  fecharDialogEstoqueCliente() {
+    this.dialogEstoqueClienteAberto = false;
   }
 
   get itens(): FormArray<FormGroup> {
@@ -257,7 +309,7 @@ export class ClientesCadastroComponent {
 
   criarItem(readonly = false): FormGroup {
     const fg = new FormGroup({
-      produtoId: new FormControl<String | null>(null, Validators.required),
+      produtoId: new FormControl<number | null>(null, Validators.required),
       possuia: new FormControl(0, Validators.min(0)),
       entregue: new FormControl(0),
       vendido: new FormControl(0),
@@ -274,17 +326,38 @@ export class ClientesCadastroComponent {
     }
     return fg;
   }
-addItem() {
-  const item = this.criarItem(false);
-  this.itens.push(item);
-  const idx = this.itens.length - 1;
+  private addItemBase(modo: 'venda' | 'estoque') {
+    const item = this.criarItem(false);
+    if (modo === 'venda') {
+      item.get('entregue')!.setValue(0, { emitEvent: false });
+      item.get('retirado')!.setValue(0, { emitEvent: false });
+    } else {
+      item.get('vendido')!.setValue(0, { emitEvent: false });
+    }
 
-  item.get('produtoId')!.valueChanges.subscribe(id => {
-    const prod = this.produtos.find(p => String(p.id) === String(id));
-    item.get('preco')!.setValue(prod ? prod.preco : 0, { emitEvent: false });
+    this.itens.push(item);
+    const idx = this.itens.length - 1;
+
+    item.get('produtoId')!.valueChanges.subscribe(id => {
+      const prod = this.produtos.find(p => Number(p.id) === Number(id));
+      item.get('preco')!.setValue(prod ? prod.preco : 0, { emitEvent: false });
+
+      const possuia = this.estoqueByProdutoId.get(String(id)) ?? 0;
+      item.get('possuia')!.setValue(possuia, { emitEvent: false });
+
+      this.recalc(idx);
+    });
+
     this.recalc(idx);
-  });
-}
+  }
+
+  addItemVenda() {
+    this.addItemBase('venda');
+  }
+
+  addItemEstoque() {
+    this.addItemBase('estoque');
+  }
 
   removeItem(index: number) {
     this.itens.removeAt(index);
@@ -322,14 +395,21 @@ addItem() {
   fg.get('valorPagar')?.setValue(valorPagar, { emitEvent: false });
 }
 
+  salvarVenda() {
+    this.salvarVisita('venda');
+  }
 
-  salvarVisita() {
+  salvarEstoque() {
+    this.salvarVisita('estoque');
+  }
+
+  private salvarVisita(tipo: 'venda' | 'estoque') {
     this.visitasForm.markAllAsTouched();
     if (this.visitasForm.invalid) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Atenção',
-        detail: 'Preencha a data e pelo menos 1 item válido.'
+        summary: 'Aten????o',
+        detail: 'Preencha a data e pelo menos 1 item v??lido.'
       });
       return;
     }
@@ -337,22 +417,21 @@ addItem() {
     if (this.itens.length === 0) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Atenção',
+        summary: 'Aten????o',
         detail: 'Adicione pelo menos um produto.'
       });
       return;
     }
 
-    const visita = {
-      cliente_id: this.camposForm.get('id')?.value,
-      data_visita: this.toIsoDate(this.visitasForm.get('data')?.value),
-      observacoes: this.visitasForm.get('observacoes')?.value || ''
-    };
+    const clienteId = this.camposForm.get('id')?.value;
+    const dataVisita = this.toIsoDate(this.visitasForm.get('data')?.value);
+    const observacoes = this.visitasForm.get('observacoes')?.value || '';
+    const tipoVisita: VisitaTipo = tipo === 'venda' ? 'VENDA' : 'ENTREGA_DEVOLUCAO';
 
-    if (!visita.cliente_id) {
+    if (!clienteId) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Atenção',
+        summary: 'Aten????o',
         detail: 'Salve o cliente antes de salvar a visita.'
       });
       return;
@@ -364,24 +443,49 @@ addItem() {
       const produtoId = fg.get('produtoId')?.value;
 
       return {
-        produto_id: String(produtoId),
+        produtoId: String(produtoId),
         possuia: Math.max(0, get('possuia')),
-        entregue: Math.max(0, get('entregue')),
-        vendido: Math.max(0, get('vendido')),
-        retirado: Math.max(0, get('retirado'))
+        entregue: tipo === 'estoque' ? Math.max(0, get('entregue')) : 0,
+        vendido: tipo === 'venda' ? Math.max(0, get('vendido')) : 0,
+        retirado: tipo === 'estoque' ? Math.max(0, get('retirado')) : 0
       };
     });
 
-    this.visitasService.salvarCompleto(visita, itensEntrada).subscribe({
+    const itensFiltrados =
+      tipo === 'venda'
+        ? itensEntrada.filter(i => i.vendido > 0)
+        : itensEntrada.filter(i => i.entregue > 0 || i.retirado > 0);
+
+    if (itensFiltrados.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Aten????o',
+        detail: tipo === 'venda'
+          ? 'Informe ao menos um produto vendido.'
+          : 'Informe ao menos uma entrega ou devolu????o.'
+      });
+      return;
+    }
+
+    const payload: VisitaPayload = {
+      clienteId: String(clienteId),
+      dataVisita,
+      tipo: tipoVisita,
+      observacoes,
+      itens: itensFiltrados
+    };
+
+    this.visitasService.salvarCompleto(payload).subscribe({
       next: ({ visitaId }) => {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
           detail: `Visita #${visitaId} salva com sucesso.`
         });
-        this.dialogAberto = false;
+        this.dialogVendaAberto = false;
+        this.dialogEstoqueAberto = false;
 
-        this.carregarTabelaVisitasCompletas(visita.cliente_id);
+        this.carregarTabelaVisitasCompletas(String(clienteId));
       },
       error: (e) => {
         console.error(e);
@@ -404,11 +508,11 @@ addItem() {
   private addItemFromEstoque(ec: EstoqueCliente) {
     const item = this.criarItem();
 
-    item.get('produtoId')!.setValue(String(ec.produto_id), { emitEvent: false });
+    item.get('produtoId')!.setValue(Number(ec.produtoId), { emitEvent: false });
 
     item.get('possuia')!.setValue(Math.max(0, Number(ec.quantidade || 0)), { emitEvent: false });
 
-    const prod = this.produtoById.get(String(ec.produto_id));
+    const prod = this.produtoById.get(String(ec.produtoId));
     item.get('preco')!.setValue(prod ? prod.preco : null, { emitEvent: false });
 
     item.get('possuiAgora')!.setValue(item.get('possuia')!.value, { emitEvent: false });
@@ -416,16 +520,65 @@ addItem() {
     this.itens.push(item);
   }
 
-  private preencherItensComConsignado(clienteId: string) {
+  private carregarEstoqueCliente(
+    clienteId: string,
+    preencherItens: boolean,
+    modo: 'venda' | 'estoque'
+  ) {
     this.estoqueClienteService.obterPorClienteComSaldo(clienteId).subscribe({
       next: (lista) => {
+        this.estoqueByProdutoId.clear();
+        (lista || []).forEach(ec => {
+          this.estoqueByProdutoId.set(String(ec.produtoId), Number(ec.quantidade || 0));
+        });
+
+        if (!preencherItens) return;
+
+        const listaFiltrada = (lista || []).filter(ec =>
+          modo !== 'venda' || Number(ec.quantidade || 0) > 0
+        );
+
         if (this.itens.length === 1 && !this.itens.at(0)?.get('produtoId')?.value) {
           this.itens.removeAt(0);
         }
-        lista.forEach(ec => this.addItemFromEstoque(ec));
-        if (this.itens.length === 0) this.addItem();
+        listaFiltrada.forEach(ec => this.addItemFromEstoque(ec));
+        if (this.itens.length === 0) {
+          if (modo === 'estoque') {
+            this.addItemEstoque();
+          } else {
+            this.addItemVenda();
+          }
+        }
       },
       error: () => {
+      }
+    });
+  }
+
+  private carregarEstoqueClienteAtual(clienteId: string) {
+    this.loadingEstoqueCliente = true;
+    this.estoqueClienteService.obterPorClienteComSaldo(clienteId).subscribe({
+      next: (lista) => {
+        const rows = (lista || [])
+          .filter(ec => Number(ec.quantidade || 0) > 0)
+          .map(ec => {
+            const prod = this.produtoById.get(String(ec.produtoId));
+            const preco = prod?.preco ?? 0;
+            const quantidade = Number(ec.quantidade || 0);
+            return {
+              produtoId: String(ec.produtoId),
+              produtoNome: prod?.nome ?? `Produto ${ec.produtoId}`,
+              quantidade,
+              preco,
+              total: quantidade * preco
+            };
+          });
+        this.estoqueClienteRows = rows;
+        this.loadingEstoqueCliente = false;
+      },
+      error: () => {
+        this.estoqueClienteRows = [];
+        this.loadingEstoqueCliente = false;
       }
     });
   }
@@ -439,7 +592,12 @@ addItem() {
           if (!visitas || visitas.length === 0) {
             return of([]);
           }
-          const reqs = visitas.map(v => this.visitasService.getCompleta(String(v.id)));
+          const reqs = visitas.map(v => {
+            if (v.itens && v.itens.length > 0) {
+              return of({ visita: v, itens: v.itens });
+            }
+            return this.visitasService.getCompleta(String(v.id));
+          });
           return forkJoin(reqs);
         })
       )
@@ -454,19 +612,20 @@ addItem() {
           const rows: VisitaRow[] = lista.map(({ visita, itens }) => {
             const distintos = new Set(
               (itens || [])
-                .map(i => String(i.produto_id))
+                .map(i => this.getItemProdutoId(i as VisitaItem & VisitaItemLegacy))
                 .filter(pid => !!pid)
             ).size;
 
             return {
               id: String(visita.id),
-              data_visita: visita.data_visita,
+              dataVisita: this.getVisitaData(visita),
+              tipo: this.getVisitaTipoLabel(visita.tipo),
               observacoes: visita.observacoes || '',
               qtdProdutosDistintos: distintos
             };
           });
 
-          rows.sort((a, b) => (a.data_visita < b.data_visita ? 1 : -1));
+          rows.sort((a, b) => (a.dataVisita < b.dataVisita ? 1 : -1));
 
           this.visitasRows = rows;
           this.loadingVisitas = false;
@@ -485,17 +644,27 @@ addItem() {
   abrirDetalhe(row: { id: string }) {
     if (!row?.id) return;
 
-    this.dialogAberto = true;
+    this.dialogVendaAberto = false;
+    this.dialogEstoqueAberto = false;
+    this.dialogDetalheAberto = false;
 
     this.setSomenteLeitura(false);
     this.itens.clear();
 
     this.visitasService.getCompleta(String(row.id)).subscribe({
       next: ({ visita, itens }) => {
-        const [y, m, d] = (visita.data_visita || '').split('-').map(Number);
+        const isEstoque = visita.tipo === 'ENTREGA_DEVOLUCAO';
+        const dataVisita = this.getVisitaData(visita);
+        const [y, m, d] = (dataVisita || '').split('-').map(Number);
         const dataLocal = !isNaN(y) ? new Date(y, (m ?? 1) - 1, d ?? 1) : new Date();
 
-        this.tituloDialog = `Visita – ${this.formatData(visita.data_visita)}`;
+        if (isEstoque) {
+          this.dialogEstoqueAberto = true;
+          this.tituloDialogEstoque = `Entrega / Devolução ${this.formatData(dataVisita)}`;
+        } else {
+          this.dialogVendaAberto = true;
+          this.tituloDialogVenda = `Venda ${this.formatData(dataVisita)}`;
+        }
 
         this.visitasForm.patchValue({
           id: String(visita.id),
@@ -504,15 +673,16 @@ addItem() {
         }, { emitEvent: false });
 
         (itens || []).forEach(it => {
+          const produtoId = Number(this.getItemProdutoId(it as VisitaItem & VisitaItemLegacy));
           const g = this.criarItem(true);
           g.patchValue({
-            produtoId: String(it.produto_id ?? ''),
-            possuia: it.possuia ?? 0,
+            produtoId: produtoId,
+            possuia: this.getItemPossuia(it),
             entregue: it.entregue ?? 0,
             vendido: it.vendido ?? 0,
             retirado: it.retirado ?? 0,
-            possuiAgora: it.possui_agora ?? 0,
-            preco: this.produtos.find(p => String(p.id) === String(it.produto_id))?.preco ?? null
+            possuiAgora: this.getItemPossuiAgora(it as VisitaItem & VisitaItemLegacy),
+            preco: this.produtos.find(p => Number(p.id) === Number(produtoId))?.preco ?? null
           }, { emitEvent: false });
           this.itens.push(g);
           this.recalc(this.itens.length - 1);
@@ -521,7 +691,8 @@ addItem() {
         this.setSomenteLeitura(true);
       },
       error: () => {
-        this.dialogAberto = false;
+        this.dialogVendaAberto = false;
+        this.dialogEstoqueAberto = false;
         this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao carregar a visita.' });
       }
     });
@@ -546,57 +717,44 @@ addItem() {
     return loc?.nome ?? '';
   }
 
+  private getVisitaData(visita: Visita): string {
+    return visita.dataVisita || visita.data_visita || '';
+  }
+
+  private getVisitaTipoLabel(tipo?: VisitaTipo): string {
+    if (!tipo) return '';
+    return tipo === 'ENTREGA_DEVOLUCAO' ? 'ENTREGA / DEVOLUCAO' : 'VENDA';
+  }
+
+  private getItemProdutoId(it: VisitaItem & VisitaItemLegacy): string {
+    return String(it.produtoId ?? it.produto_id ?? '');
+  }
+
+  private getItemPossuia(it: VisitaItem): number {
+    return Number(it.possuia ?? it.possua ?? 0);
+  }
+
+  private getItemPossuiAgora(it: VisitaItem & VisitaItemLegacy): number {
+    return Number(it.possuiAgora ?? it.possui_agora ?? 0);
+  }
+
 
 
 
   imprimirVisita(visitaId: string) {
     if (!visitaId) return;
 
-    this.visitasService.getCompleta(String(visitaId)).subscribe({
-      next: ({ visita, itens }) => {
-        const cliente = this.camposForm.getRawValue();
-        const localidadeNome = this.getLocalidadeNome(cliente?.localidadeId);
-        const dataBR = this.formatData(visita.data_visita);
-
-        const prodById = new Map<string, Produto>();
-        (this.produtos || []).forEach(p => prodById.set(String(p.id), p));
-
-        let totalGeral = 0;
-        const linhas = (itens || []).map(it => {
-          const prod = prodById.get(String(it.produto_id));
-          const preco = prod?.preco ?? 0;
-          const totalLinha = (it.vendido ?? 0) * preco;
-          totalGeral += totalLinha;
-
-          return `
-          <tr>
-            <td>${this._esc(prod?.nome ?? `Produto ${it.produto_id}`)}</td>
-            <td class="num">${it.possuia ?? 0}</td>
-            <td class="num">${it.entregue ?? 0}</td>
-            <td class="num">${it.vendido ?? 0}</td>
-            <td class="num">${it.retirado ?? 0}</td>
-            <td class="num">${it.possui_agora ?? 0}</td>
-            <td class="num">${this._moeda(preco)}</td>
-            <td class="num">${this._moeda(totalLinha)}</td>
-          </tr>`;
-        }).join('');
-
-        const html = this._notaHtml({
-          empresa: { nome: 'BancaZapp', cnpj: '00.000.000/0000-00', endereco: 'Endereço da Empresa, 123' },
-          cliente: { nome: cliente?.nome ?? '', email: cliente?.email ?? '', telefone: cliente?.telefone ?? '', endereco: cliente?.endereco ?? '', localidade: localidadeNome },
-          visita: { id: String(visita.id), data: dataBR, observacoes: visita.observacoes || '-' },
-          linhasHtml: linhas,
-          totalGeral
-        });
-
-        const win = window.open('', '', 'width=920,height=700');
-        if (!win) return;
-        win.document.open();
-        win.document.write(html);
-        win.document.close();
-        win.focus();
-        win.print();
-       
+    this.visitasService.getNotaConferencia(String(visitaId)).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+        if (!win) {
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `nota-conferencia-${visitaId}.pdf`;
+          link.click();
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
       },
       error: (e) => {
         console.error(e);
@@ -605,118 +763,4 @@ addItem() {
     });
   }
 
-
-  private _moeda(v: number) {
-    return (v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-  }
-
-  private _esc(s: string) {
-    return (s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]!));
-  }
-
-  private _notaHtml(ctx: {
-    empresa: { nome: string; cnpj: string; endereco: string; };
-    cliente: { nome: string; email: string; telefone: string; endereco: string; localidade: string; };
-    visita: { id: string; data: string; observacoes: string; };
-    linhasHtml: string;
-    totalGeral: number;
-  }) {
-    return `
-  <!doctype html>
-  <html lang="pt-BR">
-  <head>
-    <meta charset="utf-8">
-    <title>Nota da Visita ${this._esc(ctx.visita.id)}</title>
-    <style>
-      @page { size: A4; margin: 14mm; }
-      * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
-      body { color: #222; }
-      .nota { max-width: 800px; margin: 0 auto; }
-      .row { display: flex; gap: 16px; }
-      .col { flex: 1; }
-      h1 { margin: 0 0 8px; font-size: 20px; }
-      h2 { margin: 16px 0 8px; font-size: 16px; }
-      .muted { color: #666; font-size: 12px; }
-      .box { border: 1px solid #ddd; padding: 12px; border-radius: 6px; }
-      table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-      th, td { border: 1px solid #ddd; padding: 6px 8px; font-size: 12px; }
-      th { background: #f6f6f6; text-align: left; }
-      .num { text-align: right; }
-      .total { font-weight: bold; font-size: 14px; }
-      .foot { margin-top: 16px; }
-      .right { text-align: right; }
-      .mb8 { margin-bottom: 8px; }
-      .mb16 { margin-bottom: 16px; }
-      .mb24 { margin-bottom: 24px; }
-      .titulo { display:flex; justify-content:space-between; align-items:flex-start; }
-      .linha { border-bottom: 1px solid #eee; margin: 8px 0 12px; }
-      @media print {
-        .no-print { display: none; }
-        body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="nota">
-      <div class="titulo">
-        <div>
-          <h1>${this._esc(ctx.empresa.nome)}</h1>
-          <div class="muted">${this._esc(ctx.empresa.endereco)} • CNPJ: ${this._esc(ctx.empresa.cnpj)}</div>
-        </div>
-        <div class="right">
-          <div><strong>Nota da Visita</strong> #${this._esc(ctx.visita.id)}</div>
-          <div>${this._esc(ctx.visita.data)}</div>
-        </div>
-      </div>
-
-      <div class="linha"></div>
-
-      <div class="row">
-        <div class="col box">
-          <h2>Cliente</h2>
-          <div class="mb8"><strong>${this._esc(ctx.cliente.nome)}</strong></div>
-          <div class="muted">${this._esc(ctx.cliente.endereco)}</div>
-          <div class="muted">${this._esc(ctx.cliente.localidade)}</div>
-          <div class="muted">${this._esc(ctx.cliente.email)} • ${this._esc(ctx.cliente.telefone)}</div>
-        </div>
-        <div class="col box">
-          <h2>Visita</h2>
-          <div><strong>Data:</strong> ${this._esc(ctx.visita.data)}</div>
-          <div class="mb8"><strong>Obs.:</strong> ${this._esc(ctx.visita.observacoes)}</div>
-        </div>
-      </div>
-
-      <h2 class="mb8">Itens negociados</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th class="num">Possuía</th>
-            <th class="num">Entregue</th>
-            <th class="num">Vendido</th>
-            <th class="num">Retirado</th>
-            <th class="num">Saldo</th>
-            <th class="num">Preço</th>
-            <th class="num">Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${ctx.linhasHtml || `<tr><td colspan="8" class="muted">Sem itens</td></tr>`}
-        </tbody>
-        <tfoot>
-          <tr>
-            <td class="right total" colspan="7">Total Geral</td>
-            <td class="num total">${this._moeda(ctx.totalGeral)}</td>
-          </tr>
-        </tfoot>
-      </table>
-
-      <div class="foot muted">
-        <div class="mb8">Documento gerado automaticamente pelo sistema — ${this._esc(ctx.empresa.nome)}</div>
-      </div>
-    </div>
-  </body>
-  </html>
-  `;
-  }
 }
