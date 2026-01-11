@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { ClientesService } from '../../../services/clientes.service';
 import { Cliente } from '../../../models/cliente';
 import { forkJoin } from 'rxjs';
@@ -12,6 +12,8 @@ import { InputText } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ToastModule } from "primeng/toast";
 import { MessageService } from 'primeng/api';
+import { LocalidadeService } from '../../../services/localidade.service';
+import { Localidade } from '../../../models/localidade';
 
 @Component({
   selector: 'app-clientes-manter',
@@ -41,19 +43,37 @@ export class ClientesManterComponent {
   nomeBusca = '';
   loadingDelete = false;
 
-  constructor(private service: ClientesService, private messageService: MessageService) { }
+  constructor(
+    private service: ClientesService,
+    private localidadeService: LocalidadeService,
+    private messageService: MessageService
+  ) { }
 
   ngOnInit(): void {
-    this.service.obterTodos().subscribe({
-      next: (lista) => {
+    forkJoin({
+      clientes: this.service.obterTodos(),
+      localidades: this.localidadeService.obterTodos()
+    }).subscribe({
+      next: ({ clientes, localidades }) => {
+        const localidadeById = new Map<string, string>();
+        (localidades || []).forEach((l: Localidade) => {
+          if (l.id != null) localidadeById.set(String(l.id), l.nome);
+        });
+
+        const lista = (clientes || []).map(c => ({
+          ...c,
+          localidade: localidadeById.get(String(c.localidadeId ?? '')) ?? ''
+        }));
+
         this.clientesOrigem = lista ?? [];
         this.clientes = [...this.clientesOrigem];
-      },error: (err) => {
+      },
+      error: (err) => {
         console.error('Erro ao carregar clientes', err);
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Não foi possível carregar a lista de clientes.'
+          detail: 'NÇœo foi possÇðvel carregar a lista de clientes.'
         });
       }
     });
@@ -104,7 +124,7 @@ export class ClientesManterComponent {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'Clientes excluídos com sucesso!'
+          detail: 'Clientes excluÇðdos com sucesso!'
         });
       },
       error: (err) => {

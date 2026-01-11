@@ -1,39 +1,39 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { VisitaItem } from '../models/visita-item'
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitaItemService {
 
-private apiUrl = 'http://localhost:3000/visita_item';
+  private apiUrl = `${environment.apiBaseUrl}/visitas`;
 
   constructor(private http: HttpClient) {}
 
   obterTodos(): Observable<VisitaItem[]> {
-    return this.http.get<VisitaItem[]>(this.apiUrl);
+    return this.http.get<VisitaItem[]>(`${this.apiUrl}/itens`);
   }
 
   porVisita(visitaId: string): Observable<VisitaItem[]> {
-    const params = new HttpParams().set('visita_id', visitaId);
-    return this.http.get<VisitaItem[]>(this.apiUrl, { params });
+    return this.http.get<VisitaItem[]>(`${this.apiUrl}/${visitaId}/itens`);
   }
 
   carregar(id: string): Observable<VisitaItem> {
-    return this.http.get<VisitaItem>(`${this.apiUrl}/${id}`);
+    return this.http.get<VisitaItem>(`${this.apiUrl}/itens/${id}`);
   }
 
   salvar(item: VisitaItem): Observable<VisitaItem> {
-    return this.http.post<VisitaItem>(this.apiUrl, item);
+    return this.http.post<VisitaItem>(`${this.apiUrl}/${item.visita_id}/itens`, item);
   }
 
   editar(item: VisitaItem): Observable<VisitaItem> {
-    return this.http.put<VisitaItem>(`${this.apiUrl}/${item.id}`, item);
+    return this.http.put<VisitaItem>(`${this.apiUrl}/itens/${item.id}`, item);
   }
 
   deletar(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/itens/${id}`);
   }
 }

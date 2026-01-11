@@ -22,12 +22,12 @@
           formControlName="nome"
           class="w-full" />
         <small *ngIf="isCampoInvalido('nome')" class="text-red-500">
-          Campo obrigatório
+          Campo obrigatИrio
         </small>
       </div>
 
       <div>
-        <label class="block font-semibold mb-1">Preço *</label>
+        <label class="block font-semibold mb-1">PreВo *</label>
         <p-inputNumber
           formControlName="preco"
           mode="currency"
@@ -37,7 +37,7 @@
           class="w-full">
         </p-inputNumber>
         <small *ngIf="isCampoInvalido('preco')" class="text-red-500">
-          Campo obrigatório
+          Campo obrigatИrio
         </small>
       </div>
 
@@ -46,13 +46,13 @@
         <p-dropdown
           [options]="categorias"
           optionLabel="nome"
-          optionValue="nome"
+          optionValue="id"
           placeholder="Selecione uma categoria"
-          formControlName="categoria"
+          formControlName="categoriaId"
           class="w-full">
         </p-dropdown>
-        <small *ngIf="isCampoInvalido('categoria')" class="text-red-500">
-          Campo obrigatório
+        <small *ngIf="isCampoInvalido('categoriaId')" class="text-red-500">
+          Campo obrigatИrio
         </small>
       </div>
 

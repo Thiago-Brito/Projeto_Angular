@@ -2,13 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Produto } from '../models/produto';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ProdutoService {
 
-  private apiUrl = 'http://localhost:3000/produtos';
+  private apiUrl = `${environment.apiBaseUrl}/produtos`;
 
   constructor(private http: HttpClient) { }
 
@@ -23,7 +24,7 @@ export class ProdutoService {
     let parametros = new HttpParams();
 
     if (nome) {
-      parametros = parametros.set('nome_like', nome);
+      parametros = parametros.set('nome', nome);
     }
 
     return this.http.get<Produto[]>(this.apiUrl, {

@@ -2,6 +2,7 @@ export interface Produto {
     id?: string;
     nome: string;
     preco: number;
-    categoria: string;
+    categoriaId: number;
+    categoria?: string;
     selecionado?: boolean;
 }

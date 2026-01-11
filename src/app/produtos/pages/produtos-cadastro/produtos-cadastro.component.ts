@@ -39,12 +39,17 @@ export class ProdutosCadastroComponent implements OnInit {
   titulo = 'Cadastrar produto';
   botaoTexto = 'Cadastrar';
 
-  constructor(private produtoService: ProdutoService, private categoriaService: CategoriaService, private route: ActivatedRoute,  private messageService: MessageService) {
+  constructor(
+    private produtoService: ProdutoService,
+    private categoriaService: CategoriaService,
+    private route: ActivatedRoute,
+    private messageService: MessageService
+  ) {
     this.camposForm = new FormGroup({
       id: new FormControl(null),
       nome: new FormControl('', Validators.required),
       preco: new FormControl('', Validators.required),
-      categoria: new FormControl('', Validators.required)
+      categoriaId: new FormControl(null, Validators.required)
     });
   }
 
@@ -63,9 +68,14 @@ export class ProdutosCadastroComponent implements OnInit {
 
         this.produtoService.carregarProduto(id).subscribe({
           next: produto => {
-            this.camposForm.patchValue(produto);
+            this.camposForm.patchValue({
+              id: produto.id ?? null,
+              nome: produto.nome,
+              preco: produto.preco,
+              categoriaId: (produto as any).categoriaId ?? null
+            });
             this.titulo = 'Editar produto';
-            this.botaoTexto = 'Salvar alteraçõess';
+            this.botaoTexto = 'Salvar alteraÇõÇæess';
 
           },
           error: erro => {
@@ -126,8 +136,8 @@ export class ProdutosCadastroComponent implements OnInit {
     }else{
       this.messageService.add({
         severity: 'warn',
-        summary: 'Atenção',
-        detail: 'Por favor, preencha todos os campos obrigatórios.'
+        summary: 'AtenÇõÇœo',
+        detail: 'Por favor, preencha todos os campos obrigatÇürios.'
       });
     }
   }

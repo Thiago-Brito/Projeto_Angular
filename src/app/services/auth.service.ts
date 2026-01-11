@@ -1,29 +1,33 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { User } from '../models/user';
-import { map, Observable, throwError } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private apiUrl = `${environment.apiBaseUrl}/auth/login`;
 
-   private apiUrl = 'http://localhost:3000/users'; // coleção no db.json
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   login(login: string, senha: string): Observable<User> {
-    return this.http.get<User[]>(`${this.apiUrl}?login=${login}&senha=${senha}`).pipe(
-      map(users => {
-        if (users.length === 1) {
-          localStorage.setItem('usuario', JSON.stringify(users[0]));
-          localStorage.setItem('token', btoa(`${users[0].login}:${users[0].senha}`));
-          return users[0];
-        } else {
-          throw new Error('Login ou senha inválidos');
-        }
-      })
-    );
+    return this.http
+      .post<User | { usuario: User; token?: string }>(this.apiUrl, { login, senha })
+      .pipe(
+        map((resp) => {
+          const user = (resp as { usuario?: User })?.usuario ?? (resp as User);
+          if (!user) {
+            throw new Error('Login ou senha invalidos');
+          }
+
+          const token = (resp as { token?: string })?.token ?? btoa(`${user.login}:${user.senha}`);
+          localStorage.setItem('usuario', JSON.stringify(user));
+          localStorage.setItem('token', token);
+          return user;
+        })
+      );
   }
 
   getUsuarioLogado(): User | null {

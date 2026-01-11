@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
@@ -14,6 +14,8 @@ import { Produto } from '../../../models/produto';
 import { ProdutoService } from '../../../services/produto.service';
 import { ToastModule } from "primeng/toast";
 import { MessageService } from 'primeng/api';
+import { CategoriaService } from '../../../services/categoria.service';
+import { Categoria } from '../../../models/categoria';
 
 @Component({
   selector: 'app-produtos-manter',
@@ -41,14 +43,39 @@ export class ProdutosManterComponent  implements OnInit {
   produtos: Produto[] = [];           
   selecionados: Produto[] = [];       
   
-  constructor(private service: ProdutoService, private messageService: MessageService) { }
+  constructor(
+    private service: ProdutoService,
+    private categoriaService: CategoriaService,
+    private messageService: MessageService
+  ) { }
   
   ngOnInit(): void {
-    this.service.obterTodos().subscribe({
-      next: (listaProdutos) => {
-        this.produtosOrigem = listaProdutos ?? [];
+    forkJoin({
+      produtos: this.service.obterTodos(),
+      categorias: this.categoriaService.obterTodos()
+    }).subscribe({
+      next: ({ produtos, categorias }) => {
+        const categoriaById = new Map<string, string>();
+        (categorias || []).forEach((c: Categoria) => {
+          if (c.id != null) categoriaById.set(String(c.id), c.nome);
+        });
+
+        const listaProdutos = (produtos || []).map((p) => ({
+          ...p,
+          categoria: categoriaById.get(String(p.categoriaId ?? '')) ?? ''
+        }));
+
+        this.produtosOrigem = listaProdutos;
         this.produtos = [...this.produtosOrigem];
       },
+      error: (err) => {
+        console.error('Erro ao carregar produtos/categorias', err);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Falha ao carregar produtos.'
+        });
+      }
     });
   }
 

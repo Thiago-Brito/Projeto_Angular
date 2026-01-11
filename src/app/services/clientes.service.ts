@@ -2,13 +2,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Cliente } from '../models/cliente';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ClientesService {
 
-  private apiUrl = 'http://localhost:3000/clientes';
+  private apiUrl = `${environment.apiBaseUrl}/clientes`;
 
   constructor(private http: HttpClient) { }
 
@@ -23,7 +24,7 @@ export class ClientesService {
     let parametros = new HttpParams();
 
     if (nome) {
-      parametros = parametros.set('nome_like', nome);
+      parametros = parametros.set('nome', nome);
     }
 
     return this.http.get<Cliente[]>(this.apiUrl, {

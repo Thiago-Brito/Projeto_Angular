@@ -108,7 +108,7 @@ export class ClientesCadastroComponent {
       email: new FormControl('', [Validators.required, Validators.email]),
       telefone: new FormControl(''),
       endereco: new FormControl(''),
-      localidade: new FormControl('', Validators.required),
+      localidadeId: new FormControl(null, Validators.required),
       comissao: new FormControl('', Validators.required),
     });
 
@@ -129,7 +129,15 @@ export class ClientesCadastroComponent {
 
         this.clienteService.carregarCliente(id).subscribe({
           next: cliente => {
-            this.camposForm.patchValue(cliente);
+            this.camposForm.patchValue({
+              id: cliente.id ?? null,
+              nome: cliente.nome,
+              email: cliente.email,
+              telefone: cliente.telefone,
+              endereco: cliente.endereco,
+              localidadeId: (cliente as any).localidadeId ?? null,
+              comissao: cliente.comissao
+            });
             this.titulo = 'Editar cliente';
             this.botaoTexto = 'Salvar alterações';
             this.carregarTabelaVisitasCompletas(String(cliente.id));
@@ -217,7 +225,8 @@ export class ClientesCadastroComponent {
   }
 
   isCampoInvalido(nomeCampo: string): boolean {
-    const campo = this.camposForm.get(nomeCampo);
+    const campoNome = nomeCampo === 'localidade' ? 'localidadeId' : nomeCampo;
+    const campo = this.camposForm.get(campoNome);
     return campo?.invalid && campo?.touched && campo?.errors?.['required']
   }
 
@@ -531,6 +540,11 @@ addItem() {
     }
   }
 
+  private getLocalidadeNome(id: string | number | null | undefined): string {
+    if (id == null) return '';
+    const loc = this.localidades.find(l => String(l.id) === String(id));
+    return loc?.nome ?? '';
+  }
 
 
 
@@ -540,7 +554,8 @@ addItem() {
 
     this.visitasService.getCompleta(String(visitaId)).subscribe({
       next: ({ visita, itens }) => {
-        const cliente = this.camposForm.getRawValue(); 
+        const cliente = this.camposForm.getRawValue();
+        const localidadeNome = this.getLocalidadeNome(cliente?.localidadeId);
         const dataBR = this.formatData(visita.data_visita);
 
         const prodById = new Map<string, Produto>();
@@ -568,7 +583,7 @@ addItem() {
 
         const html = this._notaHtml({
           empresa: { nome: 'BancaZapp', cnpj: '00.000.000/0000-00', endereco: 'Endereço da Empresa, 123' },
-          cliente: { nome: cliente?.nome ?? '', email: cliente?.email ?? '', telefone: cliente?.telefone ?? '', endereco: cliente?.endereco ?? '', localidade: cliente?.localidade ?? '' },
+          cliente: { nome: cliente?.nome ?? '', email: cliente?.email ?? '', telefone: cliente?.telefone ?? '', endereco: cliente?.endereco ?? '', localidade: localidadeNome },
           visita: { id: String(visita.id), data: dataBR, observacoes: visita.observacoes || '-' },
           linhasHtml: linhas,
           totalGeral

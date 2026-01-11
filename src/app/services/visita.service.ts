@@ -5,13 +5,14 @@ import { Visita } from '../models/visita';
 import { EstoqueClienteService } from './estoque-cliente.service';
 import { VisitaItemService } from './visita-item.service';
 import { VisitaItem } from '../models/visita-item';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitasService {
 
-  private apiUrl = 'http://localhost:3000/visita';
+  private apiUrl = `${environment.apiBaseUrl}/visitas`;
 
   constructor(
     private http: HttpClient,
@@ -28,10 +29,10 @@ export class VisitasService {
   }
 
   filtrar(clienteId?: string, data?: string): Observable<Visita[]> {
+    const url = clienteId ? `${this.apiUrl}/cliente/${clienteId}` : this.apiUrl;
     let params = new HttpParams();
-    if (clienteId) params = params.set('cliente_id', clienteId);
     if (data) params = params.set('data_visita', data);
-    return this.http.get<Visita[]>(this.apiUrl, { params });
+    return this.http.get<Visita[]>(url, { params });
   }
 
   salvar(visita: Visita): Observable<Visita> {

@@ -1,12 +1,13 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { EstoqueCliente } from '../models/estoque-cliente';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class EstoqueClienteService {
 
-  private apiUrl = 'http://localhost:3000/estoque_cliente';
+  private apiUrl = `${environment.apiBaseUrl}/estoques`;
 
   constructor(private http: HttpClient) { }
 
@@ -19,10 +20,13 @@ export class EstoqueClienteService {
   }
 
   porClienteProduto(clienteId: string, produtoId: string): Observable<EstoqueCliente[]> {
-    const params = new HttpParams()
-      .set('cliente_id', clienteId)
-      .set('produto_id', produtoId);
-    return this.http.get<EstoqueCliente[]>(this.apiUrl, { params });
+    return this.http
+      .get<EstoqueCliente[]>(`${this.apiUrl}/cliente/${clienteId}`)
+      .pipe(
+        map((lista) =>
+          (lista || []).filter((ec) => String(ec.produto_id) === String(produtoId))
+        )
+      );
   }
 
   salvar(reg: EstoqueCliente): Observable<EstoqueCliente> {
@@ -39,7 +43,7 @@ export class EstoqueClienteService {
 
   obterPorClienteComSaldo(clienteId: string) {
     return this.http.get<EstoqueCliente[]>(
-      `${this.apiUrl}?cliente_id=${clienteId}&quantidade_gte=1`
+      `${this.apiUrl}/cliente/${clienteId}`
     );
   }
 }

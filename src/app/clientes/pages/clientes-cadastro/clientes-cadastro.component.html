@@ -201,8 +201,8 @@
 
         <div class="mb-2">
             <label class="block font-semibold mb-1">Localidade *</label>
-            <p-dropdown [options]="localidades" optionLabel="nome" optionValue="nome"
-                placeholder="Selecione uma localidade" formControlName="localidade" class="w-full">
+            <p-dropdown [options]="localidades" optionLabel="nome" optionValue="id"
+                placeholder="Selecione uma localidade" formControlName="localidadeId" class="w-full">
             </p-dropdown>
             <small *ngIf="isCampoInvalido('localidade')" class="text-red-500">Campo obrigatório</small>
         </div>
