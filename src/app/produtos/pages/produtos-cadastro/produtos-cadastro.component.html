@@ -22,22 +22,23 @@
           formControlName="nome"
           class="w-full" />
         <small *ngIf="isCampoInvalido('nome')" class="text-red-500">
-          Campo obrigatИrio
+          Campo obrigatorio
         </small>
       </div>
 
       <div>
-        <label class="block font-semibold mb-1">PreВo *</label>
-        <p-inputNumber
-          formControlName="preco"
-          mode="currency"
-          currency="BRL"
-          locale="pt-BR"
-          placeholder="Ex. R$ 9,99"
-          class="w-full">
-        </p-inputNumber>
+        <label class="block font-semibold mb-1">Preco *</label>
+        <input
+          pInputText
+          type="text"
+          inputmode="numeric"
+          placeholder="Ex. 0,00"
+          [value]="precoDisplay"
+          (input)="onPrecoInput($event)"
+          (blur)="onPrecoBlur()"
+          class="w-full" />
         <small *ngIf="isCampoInvalido('preco')" class="text-red-500">
-          Campo obrigatИrio
+          Campo obrigatorio
         </small>
       </div>
 
@@ -52,7 +53,7 @@
           class="w-full">
         </p-dropdown>
         <small *ngIf="isCampoInvalido('categoriaId')" class="text-red-500">
-          Campo obrigatИrio
+          Campo obrigatorio
         </small>
       </div>
 

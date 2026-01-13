@@ -92,6 +92,7 @@ export class ClientesCadastroComponent {
 
   dialogVendaAberto = false;
   dialogEstoqueAberto = false;
+  modoAtual: 'venda' | 'estoque' = 'venda';
   dialogDetalheAberto = false;
   dialogEstoqueClienteAberto = false;
   editando = false;
@@ -251,6 +252,7 @@ export class ClientesCadastroComponent {
     this.dialogVendaAberto = tipo === 'venda';
     this.dialogEstoqueAberto = tipo === 'estoque';
     this.dialogDetalheAberto = false;
+    this.modoAtual = tipo;
 
     if (tipo === 'venda') {
       this.tituloDialogVenda = 'Nova venda';
@@ -331,6 +333,11 @@ export class ClientesCadastroComponent {
     if (modo === 'venda') {
       item.get('entregue')!.setValue(0, { emitEvent: false });
       item.get('retirado')!.setValue(0, { emitEvent: false });
+      item.get('possuiAgora')!.enable({ emitEvent: false });
+      item.get('possuia')!.disable({ emitEvent: false });
+      item.get('vendido')!.disable({ emitEvent: false });
+      item.get('entregue')!.disable({ emitEvent: false });
+      item.get('retirado')!.disable({ emitEvent: false });
     } else {
       item.get('vendido')!.setValue(0, { emitEvent: false });
     }
@@ -377,11 +384,19 @@ export class ClientesCadastroComponent {
   const fg = this.getItem(i);
   const possuia  = Number(fg.get('possuia')?.value)  || 0;
   const entregue = Number(fg.get('entregue')?.value) || 0;
-  const vendido  = Number(fg.get('vendido')?.value)  || 0;
+  let vendido  = Number(fg.get('vendido')?.value)  || 0;
   const retirado = Number(fg.get('retirado')?.value) || 0;
+  let possuiAgora = Number(fg.get('possuiAgora')?.value) || 0;
 
-  const possuiAgora = Math.max(0, possuia + entregue - vendido - retirado);
-  fg.get('possuiAgora')?.setValue(possuiAgora, { emitEvent: false });
+  if (this.modoAtual === 'venda' && !this.somenteLeitura) {
+    possuiAgora = Math.max(0, Math.min(possuia, possuiAgora));
+    vendido = Math.max(0, possuia - possuiAgora);
+    fg.get('possuiAgora')?.setValue(possuiAgora, { emitEvent: false });
+    fg.get('vendido')?.setValue(vendido, { emitEvent: false });
+  } else {
+    possuiAgora = Math.max(0, possuia + entregue - vendido - retirado);
+    fg.get('possuiAgora')?.setValue(possuiAgora, { emitEvent: false });
+  }
 
   const preco = Number(fg.get('preco')?.value) || 0;
   const valorBruto = vendido * preco;
@@ -507,6 +522,14 @@ export class ClientesCadastroComponent {
 
   private addItemFromEstoque(ec: EstoqueCliente) {
     const item = this.criarItem();
+
+    if (this.modoAtual === 'venda') {
+      item.get('possuiAgora')!.enable({ emitEvent: false });
+      item.get('possuia')!.disable({ emitEvent: false });
+      item.get('vendido')!.disable({ emitEvent: false });
+      item.get('entregue')!.disable({ emitEvent: false });
+      item.get('retirado')!.disable({ emitEvent: false });
+    }
 
     item.get('produtoId')!.setValue(Number(ec.produtoId), { emitEvent: false });
 
@@ -661,9 +684,11 @@ export class ClientesCadastroComponent {
         if (isEstoque) {
           this.dialogEstoqueAberto = true;
           this.tituloDialogEstoque = `Entrega / Devolução ${this.formatData(dataVisita)}`;
+          this.modoAtual = 'estoque';
         } else {
           this.dialogVendaAberto = true;
           this.tituloDialogVenda = `Venda ${this.formatData(dataVisita)}`;
+          this.modoAtual = 'venda';
         }
 
         this.visitasForm.patchValue({
@@ -706,7 +731,17 @@ export class ClientesCadastroComponent {
 
     } else {
       this.visitasForm.enable({ emitEvent: false });
-      this.itens.controls.forEach(g => g.get('possuiAgora')?.disable({ emitEvent: false }));
+      this.itens.controls.forEach(g => {
+        if (this.modoAtual === 'venda') {
+          g.get('possuiAgora')?.enable({ emitEvent: false });
+          g.get('possuia')?.disable({ emitEvent: false });
+          g.get('vendido')?.disable({ emitEvent: false });
+          g.get('entregue')?.disable({ emitEvent: false });
+          g.get('retirado')?.disable({ emitEvent: false });
+        } else {
+          g.get('possuiAgora')?.disable({ emitEvent: false });
+        }
+      });
       this.somenteLeitura = false;
     }
   }

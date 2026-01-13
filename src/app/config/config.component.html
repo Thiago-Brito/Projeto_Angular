@@ -69,11 +69,25 @@
             </div>
 
             <div class="mb-2">
+                <label class="block font-semibold mb-1" for="nomeFantasia">Nome Fantasia</label>
+                <input pInputText id="nomeFantasia" formControlName="nomeFantasia" placeholder="Ex. Banca Zapp"
+                    class="w-full" />
+            </div>
+
+            <div class="mb-2">
                 <label class="block font-semibold mb-1" for="cnpj">CNPJ *</label>
                 <p-inputMask id="cnpj" formControlName="cnpj" mask="99.999.999/9999-99" placeholder="00.000.000/0000-00"
                     styleClass="w-full"></p-inputMask>
                 <small class="text-red-500" *ngIf="isCampoInvalido('cnpj', userForm)">Campo obrigatorio</small>
             </div>
+
+            <div class="mb-2">
+                <label class="block font-semibold mb-1" for="telefone">Telefone</label>
+                <p-inputMask id="telefone" formControlName="telefone" mask="(99) 99999-9999"
+                    placeholder="(00) 00000-0000" styleClass="w-full"></p-inputMask>
+            </div>
+
+
 
             <div class="mt-4 flex justify-end">
                 <p-button type="submit" label="salvar" severity="success"></p-button>

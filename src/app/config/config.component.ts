@@ -45,7 +45,9 @@ export class ConfigComponent {
       email: new FormControl('', [Validators.required, Validators.email]),
       login: new FormControl(''),
       senha: new FormControl(''),
+      nomeFantasia: new FormControl(''),
       cnpj: new FormControl('', Validators.required),
+      telefone: new FormControl(''),
     });
   }
 

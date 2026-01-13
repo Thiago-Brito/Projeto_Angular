@@ -38,6 +38,7 @@ export class ProdutosCadastroComponent implements OnInit {
   isAlteracao: boolean = false;
   titulo = 'Cadastrar produto';
   botaoTexto = 'Cadastrar';
+  precoDisplay = '';
 
   constructor(
     private produtoService: ProdutoService,
@@ -74,6 +75,7 @@ export class ProdutosCadastroComponent implements OnInit {
               preco: produto.preco,
               categoriaId: (produto as any).categoriaId ?? null
             });
+            this.precoDisplay = this.formatPreco(produto.preco);
             this.titulo = 'Editar produto';
             this.botaoTexto = 'Salvar alteraÇõÇæess';
 
@@ -122,6 +124,7 @@ export class ProdutosCadastroComponent implements OnInit {
                 detail: 'Produto cadastrado com sucesso!'
               });
               this.camposForm.reset();
+              this.precoDisplay = '';
             },
             error: erro => {
               console.error('Ocorreu um erro: ', erro)
@@ -140,6 +143,44 @@ export class ProdutosCadastroComponent implements OnInit {
         detail: 'Por favor, preencha todos os campos obrigatÇürios.'
       });
     }
+  }
+
+  onPrecoInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '');
+
+    if (!digits) {
+      this.precoDisplay = '';
+      this.camposForm.get('preco')?.setValue(null, { emitEvent: false });
+      input.value = '';
+      return;
+    }
+
+    const padded = digits.padStart(3, '0');
+    const intPart = padded.slice(0, -2);
+    const decPart = padded.slice(-2);
+
+    this.precoDisplay = `${Number(intPart).toString()},${decPart}`;
+    input.value = this.precoDisplay;
+    const numeric = Number(`${intPart}.${decPart}`);
+    this.camposForm.get('preco')?.setValue(numeric, { emitEvent: false });
+  }
+
+  onPrecoBlur(): void {
+    this.camposForm.get('preco')?.markAsTouched();
+  }
+
+  private formatPreco(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined || Number.isNaN(Number(valor))) {
+      return '';
+    }
+
+    const cents = Math.round(Number(valor) * 100);
+    const digits = String(Math.abs(cents)).padStart(3, '0');
+    const intPart = digits.slice(0, -2);
+    const decPart = digits.slice(-2);
+
+    return `${Number(intPart).toString()},${decPart}`;
   }
 
   isCampoInvalido(nomeCampo: string): boolean {

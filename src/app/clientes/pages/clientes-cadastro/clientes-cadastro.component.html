@@ -37,10 +37,11 @@
                     </ng-template>
 
                     <ng-template pTemplate="body" let-r>
-                        <tr >
+                        <tr>
                             <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ formatData(r.dataVisita) }}</td>
                             <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ r.tipo || '-' }}</td>
-                            <td (click)="abrirDetalhe(r)" class="cursor-pointer text-center!">{{ r.qtdProdutosDistintos }}</td>
+                            <td (click)="abrirDetalhe(r)" class="cursor-pointer text-center!">{{ r.qtdProdutosDistintos
+                                }}</td>
                             <td class="text-center!">
                                 <button pButton icon="pi pi-print" class="p-button-text"
                                     (click)="imprimirVisita(r.id)"></button>
@@ -50,8 +51,8 @@
                 </p-table>
 
                 <p-dialog [(visible)]="dialogVendaAberto" [modal]="true"
-                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
-                    [header]="tituloDialogVenda" [maximizable]="true">
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [header]="tituloDialogVenda"
+                    [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
                         <div>
                             <label class="block mb-1">Data da visita</label>
@@ -72,11 +73,13 @@
                                 <ng-template pTemplate="header">
                                     <tr>
                                         <th class="w-1px">Produto</th>
-                                        <th class="w-1px">Vendido</th>
+                                        <th class="w-1px text-center!">Estoque</th>
+                                        <th class="w-1px text-center!">Estoque atual</th>
+                                        <th class="w-1px text-center!">Quantidade vendida</th>
                                         <th class="w-1px">Preço</th>
-                                        <th class="w-1px">Valor bruto</th>
-                                        <th class="w-1px">Desconto</th>
-                                        <th class="w-1px">A pagar</th>
+                                        <th class="w-1px text-center!">Valor bruto</th>
+                                        <th class="w-1px text-center!">Desconto</th>
+                                        <th class="w-1px text-center!">A pagar</th>
                                         <th class="w-1px"></th>
                                     </tr>
                                 </ng-template>
@@ -102,8 +105,25 @@
                                             </p-select>
                                         </td>
 
-                                        <td><input pInputText type="number" min="0" formControlName="vendido"
-                                                (input)="recalc(i)" class="w-15" />
+                                        <td class="text-center">
+                                            <div class="flex justify-center">
+                                                <input pInputText type="number" min="0" formControlName="possuia"
+                                                    readonly class="w-15 text-center" />
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <div class="flex justify-center">
+                                                <input pInputText type="number" min="0" formControlName="possuiAgora"
+                                                    (input)="recalc(i)" class="w-15 text-center" />
+                                            </div>
+                                        </td>
+
+                                        <td class="text-center">
+                                            <div class="flex justify-center">
+                                                <input pInputText type="number" min="0" formControlName="vendido"
+                                                    readonly class="w-15 text-center" />
+                                            </div>
                                         </td>
 
                                         <td class="text-center">
@@ -115,11 +135,11 @@
                                         </td>
 
                                         <td class="text-center">
-                                        {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                            {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
                                         </td>
 
                                         <td class="text-center">
-                                        {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                            {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
                                         </td>
 
                                         <td class="text-right">
@@ -133,11 +153,16 @@
                                 <ng-template pTemplate="footer">
                                     <tr>
                                         <td class="text-left font-medium">Totais</td>
+                                        <td class="text-center!">{{ total('possuia') }}</td>
+                                        <td class="text-center!">{{ total('possuiAgora') }}</td>
                                         <td class="text-center!">{{ total('vendido') }}</td>
                                         <td class="text-center!"></td>
-                                        <td class="text-center!">{{ total('valorBruto') | currency:'BRL':'symbol':'1.2-2' }}</td>
-                                        <td class="text-center!">{{ total('desconto')   | currency:'BRL':'symbol':'1.2-2' }}</td>
-                                        <td class="text-center!">{{ total('valorPagar') | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('valorBruto') |
+                                            currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('desconto') | currency:'BRL':'symbol':'1.2-2'
+                                            }}</td>
+                                        <td class="text-center!">{{ total('valorPagar') |
+                                            currency:'BRL':'symbol':'1.2-2' }}</td>
                                         <td class="text-center!"></td>
                                     </tr>
 
@@ -156,8 +181,8 @@
                 </p-dialog>
 
                 <p-dialog [(visible)]="dialogEstoqueAberto" [modal]="true"
-                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
-                    [header]="tituloDialogEstoque" [maximizable]="true">
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [header]="tituloDialogEstoque"
+                    [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
                         <div>
                             <label class="block mb-1">Data da visita</label>
@@ -170,18 +195,18 @@
                                 formControlName="observacoes"></textarea>
                         </div>
 
-                        <p-button severity="info" label="Adicionar produto" (onClick)="addItemEstoque()" icon="pi pi-plus"
-                            [disabled]="somenteLeitura"></p-button>
+                        <p-button severity="info" label="Adicionar produto" (onClick)="addItemEstoque()"
+                            icon="pi pi-plus" [disabled]="somenteLeitura"></p-button>
 
                         <div formArrayName="itens">
                             <p-table [value]="itens.controls" dataKey="id">
                                 <ng-template pTemplate="header">
                                     <tr>
                                         <th class="w-1px">Produto</th>
-                                        <th class="w-1px">Possuia</th>
-                                        <th class="w-1px">Entregue</th>
-                                        <th class="w-1px">Retirado</th>
-                                        <th class="w-1px">Possui agora</th>
+                                        <th class="w-1px text-center!">Possuia</th>
+                                        <th class="w-1px text-center!">Entregue</th>
+                                        <th class="w-1px text-center!">Retirado</th>
+                                        <th class="w-1px text-center!">Possui agora</th>
                                         <th class="w-1px"></th>
                                     </tr>
                                 </ng-template>
@@ -208,13 +233,13 @@
                                         </td>
 
                                         <td><input pInputText type="number" min="0" formControlName="possuia"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
                                         <td><input pInputText type="number" min="0" formControlName="entregue"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
                                         <td><input pInputText type="number" min="0" formControlName="retirado"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
 
                                         <td class="flex justify-center">
@@ -255,8 +280,7 @@
                 </p-dialog>
 
                 <p-dialog [(visible)]="dialogDetalheAberto" [modal]="true"
-                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
-                    [header]="tituloDialog" [maximizable]="true">
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [header]="tituloDialog" [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">
                         <div>
                             <label class="block mb-1">Data da visita</label>
@@ -275,14 +299,14 @@
                                     <tr>
                                         <th class="w-1px">Produto</th>
                                         <th class="w-1px">Possuía</th>
-                                        <th class="w-1px">Entregue</th>
-                                        <th class="w-1px">Vendido</th>
-                                        <th class="w-1px">Retirado</th>
-                                        <th class="w-1px">Possui agora</th>
+                                        <th class="w-1px text-center!">Entregue</th>
+                                        <th class="w-1px text-center!">Vendido</th>
+                                        <th class="w-1px text-center!">Retirado</th>
+                                        <th class="w-1px text-center!">Possui agora</th>
                                         <th class="w-1px">Preço</th>
-                                        <th class="w-1px">Valor bruto</th>
-                                        <th class="w-1px">Desconto</th>
-                                        <th class="w-1px">A pagar</th>
+                                        <th class="w-1px text-center!">Valor bruto</th>
+                                        <th class="w-1px text-center!">Desconto</th>
+                                        <th class="w-1px text-center!">A pagar</th>
                                         <th class="w-1px"></th>
                                     </tr>
                                 </ng-template>
@@ -309,16 +333,16 @@
                                         </td>
 
                                         <td><input pInputText type="number" min="0" formControlName="possuia"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
                                         <td><input pInputText type="number" min="0" formControlName="entregue"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
                                         <td><input pInputText type="number" min="0" formControlName="vendido"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
                                         <td><input pInputText type="number" min="0" formControlName="retirado"
-                                                (input)="recalc(i)" class="w-15" />
+                                                (input)="recalc(i)" class="w-15 text-center" />
                                         </td>
 
                                         <td class="flex justify-center">
@@ -326,7 +350,7 @@
                                                 class="w-15 items-center text-center" />
                                         </td>
 
-                                       <td class="text-center">
+                                        <td class="text-center">
                                             {{getItem(i).get('preco')?.value | currency:'BRL':'symbol':'1.2-2'}}
                                         </td>
 
@@ -335,11 +359,11 @@
                                         </td>
 
                                         <td class="text-center">
-                                        {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                            {{ getItem(i).get('desconto')?.value | currency:'BRL':'symbol':'1.2-2' }}
                                         </td>
 
                                         <td class="text-center">
-                                        {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
+                                            {{ getItem(i).get('valorPagar')?.value | currency:'BRL':'symbol':'1.2-2' }}
                                         </td>
 
                                         <td class="text-right">
@@ -359,9 +383,12 @@
                                         <td class="text-center!">{{ total('retirado') }}</td>
                                         <td class="text-center!">{{ total('possuiAgora') }}</td>
                                         <td class="text-center!"></td>
-                                        <td class="text-center!">{{ total('valorBruto') | currency:'BRL':'symbol':'1.2-2' }}</td>
-                                        <td class="text-center!">{{ total('desconto')   | currency:'BRL':'symbol':'1.2-2' }}</td>
-                                        <td class="text-center!">{{ total('valorPagar') | currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('valorBruto') |
+                                            currency:'BRL':'symbol':'1.2-2' }}</td>
+                                        <td class="text-center!">{{ total('desconto') | currency:'BRL':'symbol':'1.2-2'
+                                            }}</td>
+                                        <td class="text-center!">{{ total('valorPagar') |
+                                            currency:'BRL':'symbol':'1.2-2' }}</td>
                                         <td class="text-center!"></td>
                                     </tr>
 
@@ -377,8 +404,8 @@
                 </p-dialog>
 
                 <p-dialog [(visible)]="dialogEstoqueClienteAberto" [modal]="true"
-                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }"
-                    [header]="'Produtos em Posse'" [maximizable]="true">
+                    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [header]="'Produtos em Posse'"
+                    [maximizable]="true">
                     <div class="grid gap-3 min-h-fit">
                         <p-table [value]="estoqueClienteRows" [loading]="loadingEstoqueCliente"
                             [responsiveLayout]="'scroll'">

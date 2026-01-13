@@ -4,5 +4,7 @@ export interface User {
     email:string,
     login: string,
     senha:string,
-    cnpj:string
+    nomeFantasia?: string,
+    cnpj:string,
+    telefone?: string
 }
