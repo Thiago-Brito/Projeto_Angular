@@ -32,7 +32,8 @@
                             <th class="w-12rem">Data</th>
                             <th class="w-10rem">Tipo</th>
                             <th class="text-center!">Produtos distintos</th>
-                            <th class="text-center!">Ações</th>
+                            <th class="text-center!">Status pagamento</th>
+                            <th class="text-center!">Ação</th>
                         </tr>
                     </ng-template>
 
@@ -40,9 +41,12 @@
                         <tr>
                             <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ formatData(r.dataVisita) }}</td>
                             <td (click)="abrirDetalhe(r)" class="cursor-pointer">{{ r.tipo || '-' }}</td>
-                            <td (click)="abrirDetalhe(r)" class="cursor-pointer text-center!">{{ r.qtdProdutosDistintos
-                                }}</td>
+                            <td (click)="abrirDetalhe(r)" class="cursor-pointer text-center!">{{ r.qtdProdutosDistintos }}</td>
+                            <td class="text-center!">{{ r.statusPagamento || '-' }}</td>
                             <td class="text-center!">
+                                <button pButton label="Pagar" icon="pi pi-credit-card" class="p-button-text"
+                                    (click)="abrirDialogPagamento(r)"
+                                    [disabled]="r.tipoVisita !== 'VENDA' || r.statusPagamento === 'Pago'"></button>
                                 <button pButton icon="pi pi-print" class="p-button-text"
                                     (click)="imprimirVisita(r.id)"></button>
                             </td>
@@ -50,7 +54,42 @@
                     </ng-template>
                 </p-table>
 
-                <p-dialog [(visible)]="dialogVendaAberto" [modal]="true"
+                                <p-dialog [(visible)]="dialogPagamentoAberto" [modal]="true"
+                    [breakpoints]="{ '1199px': '50vw', '575px': '90vw' }"
+                    header="Pagamento" [maximizable]="true">
+                    <form [formGroup]="pagamentoForm" class="grid gap-3 min-h-fit">
+                        <div>
+                            <label class="block mb-1">Valor pago agora</label>
+                            <input
+                                pInputText
+                                type="text"
+                                inputmode="numeric"
+                                placeholder="Ex. 10,00"
+                                [value]="pagamentoDisplay"
+                                (input)="onPagamentoInput($event)"
+                                (blur)="onPagamentoBlur()"
+                                class="w-full" />
+                        </div>
+
+                        <div class="text-sm text-gray-600">
+                            <div>Total: {{ vendaSelecionada?.totalPagar | currency:'BRL':'symbol':'1.2-2' }}</div>
+                            <div>Pago: {{ vendaSelecionada?.valorPago | currency:'BRL':'symbol':'1.2-2' }}</div>
+                            <div>Falta: {{ (vendaSelecionada?.totalPagar || 0) - (vendaSelecionada?.valorPago || 0) | currency:'BRL':'symbol':'1.2-2' }}</div>
+                        </div>
+
+                        <div class="flex justify-self-start gap-2 mt-4">
+                            <p-button severity="info" label="Usar restante" icon="pi pi-wallet" class="p-button-text"
+                                [disabled]="(vendaSelecionada?.totalPagar || 0) - (vendaSelecionada?.valorPago || 0) <= 0"
+                                (onClick)="preencherPagamentoRestante()"></p-button>
+                            <p-button severity="secondary" label="Cancelar" class="p-button-text"
+                                (onClick)="fecharDialogPagamento()"></p-button>
+                            <p-button severity="success" label="Salvar" icon="pi pi-check"
+                                [disabled]="pagamentoForm.invalid" (onClick)="salvarPagamento()"></p-button>
+                        </div>
+                    </form>
+                </p-dialog>
+
+<p-dialog [(visible)]="dialogVendaAberto" [modal]="true"
                     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [header]="tituloDialogVenda"
                     [maximizable]="true">
                     <form [formGroup]="visitasForm" class="grid gap-3 min-h-fit">

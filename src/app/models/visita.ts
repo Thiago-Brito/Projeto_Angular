@@ -9,6 +9,8 @@ export interface Visita {
   observacoes: string;
   tipo?: VisitaTipo;
   itens?: VisitaItem[];
+  valorPago?: number;
+  valor_pago?: number;
   cliente_id?: string;
   data_visita?: string;
 }

@@ -35,8 +35,12 @@ type VisitaRow = {
   id: string;
   dataVisita: string;
   tipo: string;
+  tipoVisita: string;
   observacoes: string;
   qtdProdutosDistintos: number;
+  totalPagar: number;
+  valorPago: number;
+  statusPagamento: string;
 };
 
 
@@ -95,6 +99,10 @@ export class ClientesCadastroComponent {
   modoAtual: 'venda' | 'estoque' = 'venda';
   dialogDetalheAberto = false;
   dialogEstoqueClienteAberto = false;
+  dialogPagamentoAberto = false;
+  vendaSelecionada: VisitaRow | null = null;
+  pagamentoForm: FormGroup;
+  pagamentoDisplay = '';
   editando = false;
   private estoqueByProdutoId = new Map<string, number>();
 
@@ -128,6 +136,10 @@ export class ClientesCadastroComponent {
       data: new FormControl('', Validators.required),
       itens: new FormArray<FormGroup>([])
     })
+
+    this.pagamentoForm = new FormGroup({
+      valorPago: new FormControl(null, [Validators.required, Validators.min(0.01)])
+    });
   }
 
   ngOnInit(): void {
@@ -177,6 +189,11 @@ export class ClientesCadastroComponent {
         this.produtos.forEach(p => {
           if (p.id != null) this.produtoById.set(String(p.id), p);
         });
+
+        const clienteId = String(this.camposForm.get('id')?.value || '');
+        if (clienteId) {
+          this.carregarTabelaVisitasCompletas(clienteId);
+        }
       }
     });
 
@@ -639,12 +656,30 @@ export class ClientesCadastroComponent {
                 .filter(pid => !!pid)
             ).size;
 
+            const comissaoPct = (Number(this.camposForm.get('comissao')?.value) || 0) / 100;
+            const totalBruto = (itens || []).reduce((sum, it) => {
+              const produtoId = this.getItemProdutoId(it as VisitaItem & VisitaItemLegacy);
+              const prod = this.produtoById.get(String(produtoId));
+              const preco = Number(prod?.preco ?? 0);
+              const vendido = Number((it as VisitaItem).vendido ?? 0);
+              return sum + (vendido * preco);
+            }, 0);
+            const totalPagar = Math.max(0, totalBruto - (totalBruto * comissaoPct));
+            const valorPago = Number((visita as any).valorPago ?? (visita as any).valor_pago ?? 0) || 0;
+            const statusPagamento = visita.tipo === 'VENDA'
+              ? (totalPagar <= 0 ? 'Pago' : valorPago <= 0 ? 'Pendente' : valorPago < totalPagar ? 'Parcial' : 'Pago')
+              : '';
+
             return {
               id: String(visita.id),
               dataVisita: this.getVisitaData(visita),
               tipo: this.getVisitaTipoLabel(visita.tipo),
+              tipoVisita: visita.tipo || '',
               observacoes: visita.observacoes || '',
-              qtdProdutosDistintos: distintos
+              qtdProdutosDistintos: distintos,
+              totalPagar,
+              valorPago,
+              statusPagamento
             };
           });
 
@@ -775,6 +810,137 @@ export class ClientesCadastroComponent {
 
 
 
+
+  abrirDialogPagamento(row: VisitaRow) {
+    if (!row?.id || row.tipoVisita !== 'VENDA') return;
+    this.vendaSelecionada = { ...row };
+    this.pagamentoForm.reset({ valorPago: null });
+    this.pagamentoDisplay = '';
+    this.dialogPagamentoAberto = true;
+
+    this.visitasService.getPagamento(row.id).subscribe({
+      next: (info) => {
+        if (!this.vendaSelecionada) return;
+        this.vendaSelecionada.totalPagar = Number(info.valorTotal) || 0;
+        this.vendaSelecionada.valorPago = Number(info.valorPago) || 0;
+        this.vendaSelecionada.statusPagamento = info.pago
+          ? 'Pago'
+          : this.vendaSelecionada.valorPago > 0 ? 'Parcial' : 'Pendente';
+      },
+      error: (e) => {
+        console.error(e);
+      }
+    });
+  }
+
+  fecharDialogPagamento() {
+    this.dialogPagamentoAberto = false;
+    this.vendaSelecionada = null;
+    this.pagamentoDisplay = '';
+  }
+
+  onPagamentoInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const digits = input.value.replace(/\D/g, '');
+
+    if (!digits) {
+      this.pagamentoDisplay = '';
+      this.pagamentoForm.get('valorPago')?.setValue(null, { emitEvent: false });
+      input.value = '';
+      return;
+    }
+
+    const padded = digits.padStart(3, '0');
+    const intPart = padded.slice(0, -2);
+    const decPart = padded.slice(-2);
+
+    this.pagamentoDisplay = `${Number(intPart).toString()},${decPart}`;
+    input.value = this.pagamentoDisplay;
+    const numeric = Number(`${intPart}.${decPart}`);
+    this.pagamentoForm.get('valorPago')?.setValue(numeric, { emitEvent: false });
+  }
+
+  onPagamentoBlur(): void {
+    this.pagamentoForm.get('valorPago')?.markAsTouched();
+  }
+
+  preencherPagamentoRestante(): void {
+    if (!this.vendaSelecionada) return;
+    const restante = Math.max(0, (this.vendaSelecionada.totalPagar || 0) - (this.vendaSelecionada.valorPago || 0));
+    this.pagamentoDisplay = this.formatPagamento(restante);
+    this.pagamentoForm.get('valorPago')?.setValue(restante, { emitEvent: false });
+  }
+
+  private formatPagamento(valor: number | null | undefined): string {
+    if (valor === null || valor === undefined || Number.isNaN(Number(valor))) {
+      return '';
+    }
+
+    const cents = Math.round(Number(valor) * 100);
+    const digits = String(Math.abs(cents)).padStart(3, '0');
+    const intPart = digits.slice(0, -2);
+    const decPart = digits.slice(-2);
+
+    return `${Number(intPart).toString()},${decPart}`;
+  }
+
+  salvarPagamento() {
+    this.pagamentoForm.markAllAsTouched();
+    if (!this.vendaSelecionada || this.pagamentoForm.invalid) return;
+
+    const valor = Number(this.pagamentoForm.get('valorPago')?.value) || 0;
+    this.visitasService.atualizarPagamento(this.vendaSelecionada.id, valor).subscribe({
+      next: () => {
+        const vendaId = this.vendaSelecionada?.id;
+        if (!vendaId) return;
+
+        this.visitasService.getPagamento(vendaId).subscribe({
+          next: (info) => {
+            const row = this.visitasRows.find(r => r.id === vendaId);
+            const totalPagar = Number(info.valorTotal) || 0;
+            const valorPago = Number(info.valorPago) || 0;
+            const status = info.pago
+              ? 'Pago'
+              : valorPago > 0 ? 'Parcial' : 'Pendente';
+
+            if (row) {
+              row.totalPagar = totalPagar;
+              row.valorPago = valorPago;
+              row.statusPagamento = status;
+            }
+            if (this.vendaSelecionada) {
+              this.vendaSelecionada.totalPagar = totalPagar;
+              this.vendaSelecionada.valorPago = valorPago;
+              this.vendaSelecionada.statusPagamento = status;
+            }
+
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Sucesso',
+              detail: 'Pagamento atualizado com sucesso.'
+            });
+            this.fecharDialogPagamento();
+          },
+          error: (e) => {
+            console.error(e);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Erro',
+              detail: e?.message || 'Falha ao atualizar o pagamento.'
+            });
+          }
+        });
+      },
+      error: (e) => {
+        console.error(e);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: e?.message || 'Falha ao atualizar o pagamento.'
+        });
+      }
+    });
+  }
 
   imprimirVisita(visitaId: string) {
     if (!visitaId) return;

@@ -63,6 +63,14 @@ export class VisitasService {
     );
   }
 
+  getPagamento(id: string): Observable<{ valorTotal: number; valorPago: number; pago: boolean }> {
+    return this.http.get<{ valorTotal: number; valorPago: number; pago: boolean }>(`${this.apiUrl}/${id}/pagamento`);
+  }
+
+  atualizarPagamento(id: string, valorPago: number): Observable<Visita> {
+    return this.http.patch<Visita>(`${this.apiUrl}/${id}/pagamento`, { valorPago });
+  }
+
   getNotaConferencia(id: string): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/${id}/nota-conferencia?formato=80mm`, {
       responseType: 'blob'
